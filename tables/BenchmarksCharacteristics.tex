@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+	\centering
+	\begin{adjustbox}{width=.9\textwidth}
+		\small
+	\begin{tabular}{llllllll}
+		\toprule
+		\textbf{No} & \textbf{Benchmark Name} & \textbf{Description} & \textbf{Add} & \textbf{Sub} & \textbf{Mul} & \textbf{OR} & \textbf{Operations} \\
+		\midrule
+		1     & poly  & degree-2 polynomial & 2     &       & 3     &       & 5 \\
+		2     & poly  & Degree-3 polynomial & 3     &       & 6     &       & 9 \\
+		\midrule
+		3     & chebyshev & filter & 1     & 1     & 5     &       & 7 \\
+		4     & mibench & filter & 8     &       & 7     &       & 15 \\
+		5     & sgfilter & filter & 5     & 4     & 9     &       & 18 \\
+		6     & qspline & filter & 4     &       & 23    &       & 27 \\
+		\midrule
+		7     & fft   & kernel & 3     & 3     & 4     &       & 10 \\
+		8     & kmeans & kernel & 7     & 8     & 8     &       & 23 \\
+		9     & mm    & kernel & 7     &       & 8     &       & 15 \\
+		10    & spmv  & kernel & 6     &       & 8     &       & 14 \\
+		11    & stencil & kernel & 10    & 2     & 2     &       & 14 \\
+		12    & mri   & kernel & 4     &       & 5     & 1     & 10 \\
+		\bottomrule
+	\end{tabular}%
+\end{adjustbox}%
+    \caption{Benchmarks Characteristics}
+	\label{b1:g1}%
+\end{table}%

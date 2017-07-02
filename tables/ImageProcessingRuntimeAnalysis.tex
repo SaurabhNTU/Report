@@ -1,0 +1,24 @@
+\begin{table}[htbp]
+	\centering
+		\begin{adjustbox}{width=.9\textwidth}
+		\small
+	\begin{tabular}{lllll}
+		\toprule
+		\textbf{Metrics} & \textbf{ARMv7 CPU} & \textbf{NEON (auto vector)} & \textbf{MXP} \\
+		\midrule
+		\textbf{arch} & Scalar & SIMD unit & Vector \\
+		\textbf{clock} & 667 x 10^{6}Hz & 667 x 10^{6}Hz & 110 x 10^{6}Hz \\
+		\textbf{no of lanes} & 1 & 2 x 32b & 1-16 x 32b \\
+		&   & 4 x 16b & 2-32 x 16b \\
+		&   & 8 x 8b & 4-64 x 8b \\
+		\midrule
+	\textbf{Runtime (milliseconds)} &   &   &  \\
+		\midrule
+     128 x  128      pixels & 0.406 & 0.424 & 0.03686  \\	
+	 256 x  256      pixels & 1.714 & 1.198 & 0.1843  \\
+		\bottomrule
+	\end{tabular}%
+     \end{adjustbox}%
+	\caption{Image Processing Runtime Analysis}
+		\label{ga:100}%
+\end{table}%

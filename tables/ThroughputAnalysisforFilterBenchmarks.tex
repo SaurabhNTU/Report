@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+	\centering
+		\begin{adjustbox}{width=1\textwidth}
+		\small
+	\begin{tabular}{llllll}
+		\toprule
+		\textbf{Metrics} &   & \textbf{ARMv7 CPU} & \textbf{NEON (auto vector)} & \textbf{MXP} & \textbf{INTEL i3} \\
+		\midrule
+		\textbf{arch} &   & Scalar & SIMD unit & Vector & Scalar \\
+		\textbf{clock} &   & 667 x 10^{6}Hz & 667 x 10^{6}Hz & 110 x 10^{6}Hz & 2 x 10^{9}Hz \\
+		\textbf{no of lanes} &   & 1 & 2 x 32b & 1-16 x 32b & 1 \\
+		&   &   & 4 x 16b & 2-32 x 16b &  \\
+		&   &   & 8 x 8b & 4-64 x 8b &  \\
+		&   &   &   &   &  \\
+		\midrule
+		 \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		 32b(Gops/sec)/ Word   & CHEBYSHEV & 0.1832 & 0.296 & 0.354 & 2.040 \\
+	 16b(Gops/sec)/Halfword &   & 0.1955 & 0.5159 & 0.7085 & 2.186 \\
+		 8b(Gops/sec)/Byte &   & 0.2219 & 0.5585 & 1.41 & 2.324 \\
+		   &   &   &   &   &  \\
+		   &   &   &   &   &  \\
+		\midrule
+		 \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		 32b(Gops/sec)/ Word   & MIBENCH & 0.3478 & 0.426 & 0.386 & 3.816 \\
+		 16b(Gops/sec)/Halfword &   & 0.352 & 0.7831 & 0.773 & 6.738 \\
+		 8b(Gops/sec)/Byte &   & 0.3659 & 0.460 & 1.547 & 3.338 \\
+		  &   &   &   &   &  \\
+		   &   &   &   &   &  \\
+		\midrule
+	 \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+	 32b(Gops/sec)/ Word   & QSPLINE & 0.298 & 0.4641 & 0.442 & 2.372 \\
+	16b(Gops/sec)/Halfword &   & 0.493 & 1.169 & 0.88 & 13.38 \\
+		 8b(Gops/sec)/Byte &   & 0.561 & 2.341 & 1.76 & 5.935 \\
+		\bottomrule
+	\end{tabular}%
+    \end{adjustbox}%
+
+		\caption{Throughput(Gops/sec) Analysis for Filter Benchmarks}
+		\label{poly:d}%
+\end{table}%

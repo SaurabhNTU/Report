@@ -1,0 +1,111 @@
+%% \hfill
+%	 \begin{figure}[!b]
+%	 \centering 
+%	 \begin{tikzpicture}[scale = 1.1]
+%	 \begin{semilogyaxis}[
+%		xlabel=Datasize$(N)$,
+%		ylabel=Time $(ms)$,
+%	 % 	scaled ticks=base 10:-5,
+%	 xtick pos=left,
+%	 ytick pos=left,
+%	 ymax = 600,
+%	 xmax = 16777216,
+%	 yticklabels={1,10,100,1000},
+%	 %	symbolic y coords={0.4239,0.847,1.67,3.33,6.69,13.33,26.63,54.41,70,150,290,560},
+%	 %  symbolic y coords = {-1,-0.698,-0.522,-0.397,-0.301,-0.221,-0.154,-0.0969,-0.0457,0.0,0.3010,0.4771,0.6021,0.6990,0.7782,0.8450,0.9030,0.9542,1.0,1.3010,1.4771,1.6021,1.6990,1.7782,1.8450,1.9030,1.9542,2.0,2.3010,2.4771,2.6021,2.6990,2.7782,2.8452,2.9030,2.9542,3.0},
+%	 %    ytick=data, 
+%	 %    yticklabels={0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1,2,3,4,5,6,7,8,9,10,20,30,40,50,60,70,80,90,100,200,300,400,500,600,700,800,900,1000},
+%	 symbolic x coords={131072,262144,524288,1048576,2097152,4194304,8388608,16777216},
+%	 enlargelimits=true,
+%	 xtick=data,
+%	 xticklabels={$2^{17}$,$2^{18}$,$2^{19}$,$2^{20}$,$2^{21}$,$2^{22}$,$2^{23}$,$2^{24}$},
+%	 width = 10cm,
+%	 xmode = normal,
+%	 legend pos=north west,
+%	 legend style={draw=none}
+%	 ] 
+	 
+	 
+	 % \hfill
+	 \begin{figure}[!b]
+	 \centering 
+	 \begin{tikzpicture}[scale = 1.1]
+	 \begin{semilogyaxis}[
+    xlabel=Datasize$(N)$,
+	ylabel=Time $(ms)$,
+	 % 	scaled ticks=base 10:-5,
+	 xtick pos=left,
+	 ytick pos=left,
+	 ymax = 1000,
+	 xmax = 16777216,
+	 %	 ymode=log,log ticks with fixed point,
+	 %	grid=major,
+	 %   symbolic y coords={0.4239, 0.847, 1.67, 3.33, 6.69, 13.33,26.63,54.41},
+	 %   ytick={data},
+	 symbolic x coords={131072,262144,524288,1048576,2097152,4194304,8388608,16777216},
+	 xtick=data,
+	 xticklabels={$2^{17}$,$2^{18}$,$2^{19}$,$2^{20}$,$2^{21}$,$2^{22}$,$2^{23}$,$2^{24}$},
+	 %	symbolic y coords={0.4239,0.847,1.67,3.33,6.69,13.33,26.63,54.41,70,150,290,560},
+	 width = 10cm,
+	 xmode = normal,
+	 legend pos=north west,
+	 legend style={draw=none}
+	 ]    
+   
+	\addplot plot coordinates {
+	    (131072,     0.4239)
+		(262144,     0.884)
+		(524288,    1.88)
+		(1048576,    3.465)
+		(2097152,    6.949)
+		(4194304,    13.86)
+		(8388608,   27.72)
+		(16777216,   55.46)
+		};
+
+%	\addplot plot coordinates {
+%	(131072,     0.628)
+%	(262144,     1.432)
+%	(524288,    2.71)
+%	(1048576,    5.266)
+%	(2097152,   10.695)
+%	(4194304,   21.55)
+%	(8388608,   43.143)
+%	(16777216,   95.41)
+%	
+%	};      
+	\addplot plot coordinates {
+	(131072,     10)
+	(262144,     10)
+	(524288,    10)
+	(1048576,    20)
+	(2097152,    40)
+	(4194304,    70)
+	(8388608,   130)
+	(16777216,   250)
+	
+	};   
+   
+   	\addplot plot coordinates {
+    	(131072,     0)
+    	(262144,     0)
+    	(524288,    10)
+    	(1048576,    10)
+    	(2097152,    10)
+    	(4194304,    20)
+    	(8388608,   40)
+    	(16777216,   80)
+    
+    };   
+
+%	\legend{MXP(Byte)\\Intel i3(Byte)\\ARMv7(Byte)\\Neon(Byte)\\} 
+    \legend{MXP(Byte)\\ARMv7(Byte)\\Neon(Byte)\\} 
+	\end{semilogyaxis}
+	\end{tikzpicture} 
+	\label{throughput} 
+}
+   \hspace{4.5cm}       $f(samples,time) = a * x ^ 2 + b* x + c$
+\caption{Comparing Runtime for \textit{Poly-2} benchmark.} 
+\label{dag:q}
+
+\end{figure}

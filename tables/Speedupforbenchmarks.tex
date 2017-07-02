@@ -1,0 +1,20 @@
+\begin{table}[htbp]
+	\centering
+	\begin{adjustbox}{width=1\textwidth}
+		\small		
+	
+	\begin{tabular}{llll}
+		\toprule
+		\textbf{Benchmark} & \textbf{Scalar time (sec)} & \textbf{Vector time (sec)} & \textbf{Speedup = (Scalar time / Vector time)} \\
+		\midrule
+			vbw\_mtx\_median\_t & 124e-3 & 5.012e-6 & 24.75 \\
+			vbw\_mtx\_sobel & 197.4e-3 & 24.9e-3 & 7.911 \\
+			vbw\_vec\_fir\_t & 847e-6 & 58.5e-6 & 14.49 \\
+			vbw\_mtx\_fir\_t & 10.62e-3 & 1.75e-3 & 6.057 \\
+			vbw\_mtx\_mm\_t & 276e-6 & 18.65e-6 & 14.75 \\
+		\bottomrule
+	\end{tabular}%
+\end{adjustbox}%
+\caption{Speedup for the benchmarks on Linux}
+\label{t11:tab}%
+\end{table}%

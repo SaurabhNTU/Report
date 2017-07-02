@@ -1,0 +1,28 @@
+\begin{table}[htbp]
+	\centering
+	
+	\begin{adjustbox}{width=.7\textwidth}
+		\small
+		
+	\begin{tabular}{lllll}
+		\toprule
+		\textbf{Metrics} & \textbf{ARMv7 CPU} & \textbf{MXP}  \\
+		\midrule
+		\textbf{uarch} & Scalar & Vector \\
+		\textbf{Clock} & 667 x 10^{6} Hz & 110 x 10^{6}Hz  \\
+		\textbf{No of Lanes} & 1 & 1-16 x 32b  \\
+		&   & 2-32 X16b  \\
+		&   & 4-64 X8b \\
+		&   &   \\
+		\midrule
+		\textbf{Runtime (millisecond)  } &   &   &   &  \\
+		\midrule
+		\textbf{SpMV \{25 x 25\} kernel} & 0.037 & 0.01843  \\
+		\textbf{SpMV \{50 x 25\} kernel} & 0.055 & 0.03686  \\
+		\bottomrule
+	\end{tabular}%
+    \end{adjustbox}%
+      \caption{Runtime for SpMV kernel Computation}
+	\label{www:1010}%
+\end{table}%	
+    	 

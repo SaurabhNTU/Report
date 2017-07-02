@@ -1,0 +1,41 @@
+%Introduction section
+\newpage
+
+\chapter{Introduction}
+\section{Motivation}
+Field-Programmable Gate Arrays (FPGAs) provides an easier way than Application Specific Integrated Circuits (ASICs) for the implementation of different computing platforms. FPGAs generally yield higher performance and lower power than optimized software running on high-end CPUs. However, designing hardware with FPGAs remains a difficult and time-consuming process. It requires specialized skills and hours-long CAD processing times \cite{1}. The slow place-and-route cycles while accelerating computations using programmable fabric (FPGAs) and non- availability of suitable abstractions prohibits commercial use of such platforms and thus restricting their effective usage to the hardware experts. FPGA virtualization, which is nothing but the use of the overlay architecture such as MXP soft-vector processor, has emerged as an attractive solution by providing fast compilation, run-time management and software-like programmability. These soft processors can extend the capability of embedded hard vector processors because of their improved design productivity and higher-level design abstraction. With the increasing complexity of FPGA platforms, it is being said that the use of overlay architecture will become mainstream \cite{2}. Moreover, the use of Operating system (OS) in a reconfigurable platform helps in managing various hardware tasks, better management of memory and management of the shared resources across the applications. Integrating an overlay architecture with memory subsystem and processor is very important to manage and enable sharing of limited overlay resources. Overlays exhibit features independent from the host FPGA.
+
+
+
+%\begin{figure}
+%	\centering
+%	\includegraphics[width=0.9\textwidth]{images/pop.jpg}
+%	\caption{World midyear elderly population (age \ge 85 [10]).}
+%	\label{fig:pop}
+%\end{figure}
+
+\section{Objective}
+The main objective of the dissertation is
+
+\begin{itemize}
+	\item Setting up Linux and accessing MXP overlay through it so that in future much more attention can be given on building up the MXP application rather than struggling to configure Linux for the MXP overlay.
+	\item Comparing the MXP overlay performance for some standard benchmarks against other embedded hard processors like Intel I3, ARM v9 and SIMD NEON unit.
+	\item Accelerating image processing application and computing the speedup obtained by the MXP overlay.
+	\item Accelerating the pre-existing benchmarking framework using the MXP overlay.
+\end{itemize}
+
+
+\section{Contribution}
+The main contributions can be summarized as follows:
+
+\begin{itemize}
+	\item Linux set up for accessing MXP overlay.
+	\item Performance analysis for standard benchmarks using MXP on Linux and comparison against other embedded hard processors.
+	\item Analysis of speedups for image processing applications on Linux and runtime analysis for images of different dimensions and accelerating the SpMV computational kernel using the MXP.
+\end{itemize}
+
+\section{Organization}
+The remainder of the report is organized as follows:
+
+Chapter 2 gives background information about how different acceleration computing platforms came into picture and most importantly about the FPGA overlay. In chapter 3, we describe about the MXP vector processor, it's architecture in detail and the concept of overlapping computation with communication that make it more effective in terms of throughput as compared to other embedded hard vector processors. In chapter 4, we discussed how we configured Linux for MXP on Xilinx ZedBoard so that we can provide OS support for MXP on the Xilinx ZedBoard. In chapter 5, we describe about our experimentation for the performance analysis of MXP vector processor while accelerating some standard benchmark and compute kernels. In chapter 6, we describe about our experimentation for runtime analysis using MXP vector processor while performing image processing application and SpMV computational kernel. We conclude in chapter 7 and discuss future work.
+

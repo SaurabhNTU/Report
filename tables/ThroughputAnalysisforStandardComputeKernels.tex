@@ -1,0 +1,60 @@
+\begin{table}[htbp]
+	\centering
+    	\begin{adjustbox}{width=.8\textwidth}
+    	\small
+	\begin{tabular}{llllll}
+		\toprule
+		\textbf{Metrics} &   & \textbf{ARMv7 CPU} & \textbf{NEON (auto vector)} & \textbf{MXP} & \textbf{INTEL i3} \\
+		\midrule
+		\textbf{arch} &   & Scalar & SIMD unit & Vector & Scalar \\
+		\textbf{clock} &   & 667 x 10^{6}Hz & 667 x 10^{6}Hz & 110 x 10^{6}Hz & 2 x 10^{9}Hz \\
+		\textbf{no of lanes} &   & 1 & 2 x 32b & 1-16 x 32b & 1 \\
+		&   &   & 4 x 16b & 2-32 x 16b &  \\
+		&   &   & 8 x 8b & 4-64 x 8b &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & FFT & 0.0867 & 0.137 & 0.174 & 1.0283 \\
+		  16b(Gops/sec)/Halfword &   & 0.0937 & 0.2887 & 0.349 & 2.01 \\
+		  8b(Gops/sec)/Byte &   & 0.1042 & 0.5833 & 0.6995 & 3.809 \\
+		    &   &   &   &   &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & KMEANS & 0.03174 & 0.09083 & 0.2285 & 1.918 \\
+		  16b(Gops/sec)/Halfword &   & 0.06582 & 0.257 & 0.457 & 5.301 \\
+		  8b(Gops/sec)/Byte &   & 0.0986 & 0.689 & 0.9143 & 6.96 \\
+		    &   &   &   &   &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & MM & 0.02015 & 0.06009 & 0.156 & 1.24 \\
+		  16b(Gops/sec)/Halfword &   & 0.03806 & 0.165 & 0.3136 & 3.456 \\
+		  8b(Gops/sec)/Byte &   & 0.0667 & 0.443 & 0.627 & 3.495 \\
+		    &   &   &   &   &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & SPMV & 0.01680 & 0.0532 & 0.1399 & 1.126 \\
+		  16b(Gops/sec)/Halfword &   & 0.0307 & 0.1529 & 0.279 & 2.696 \\
+		  8b(Gops/sec)/Byte &   & 0.061 & 0.391 & 0.5596 & 3.05 \\
+		    &   &   &   &   &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & STENCIL & 0.03589 & 0.05866 & 0.14 & 1.437 \\
+		  16b(Gops/sec)/Halfword &   & 0.0534 & 0.1146 & 0.29 & 2.57 \\
+		  8b(Gops/sec)/Byte &   & 0.0651 & 0.1162 & 0.589 & 2.35 \\
+		    &   &   &   &   &  \\
+		\midrule
+		  \textbf{Throughput} & \textbf{Benchmark} &   &   &   &  \\
+		\midrule
+		  32b(Gops/sec)/ Word   & MRI & 0.039 & 0.077 & 0.097 & 1.221 \\
+		  16b(Gops/sec)/Halfword &   & 0.0537 & 0.183 & 0.194 & 2.36 \\
+		  8b(Gops/sec)/Byte &   & 0.064 & 0.277 & 0.388 & 1.406 \\
+		\bottomrule
+	\end{tabular}%
+\end{adjustbox}%
+	\caption{Throughput(Gops/sec) Analysis for Standard Compute Kernels}
+		\label{poly:a}%
+\end{table}%

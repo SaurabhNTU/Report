@@ -1,0 +1,35 @@
+\newpage
+\chapter{Conclusion and Future Work}
+
+\section{Conclusions}
+
+This thesis focuses upon using FPGA overlay architecture as an accelerator for accelerating different standard benchmarks. Configuring the Linux for MXP on the ZedBoard to provide the OS support for MXP is among one of the work done in this thesis. The performance, speedup and runtime analysis of different compute kernels are obtained using the MXP overlay as a FPGA accelerator. Moreover, MXP performance is compared with different embedded hard processors such as ARM v7, NEON SIMD unit and INTEL i3. The performance in terms of throughput was measured at the byte, halfword and word level.
+
+We accelerated Poly-2 and Poly-3 benchmarks where we could get a very high throughput as well as speedup using the MXP overlay. The results show that MXP provides speedup of ${\approx}4.5$ times the speedup provided by ARM v7 and speedup of ${\approx}1.5$ times the speedup provided by NEON SIMD unit. Throughput obtained by the MXP while accelerating poly benchmarks was 1.5130 (Gops/sec) for poly-2 and 2.287 (Gops/sec) for poly-3 benchmark which is higher as compared to throughput obtained by other processors. The above results are mentioned for the word (32-bits) level operation whereas this thesis covers the throughput measurement at byte (8-bits) and halfword (16-bits) level also.
+
+Filter kernels such as CHEBYSHEV, QSPLINE and MIBENCH were accelerated using MXP. For CHEBYSHEV, we could get throughput of 1.41 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For MIBENCH, we could get throughput of 1.54 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For QSPLINE, we could get throughput of 1.76 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. The above results are mentioned for the word (32-bits) level operation whereas this thesis covers the throughput measurement at byte (8-bits) and halfword (16-bits) level also.
+
+
+Standard kernels such as FFT, KMEANS, MM, SPMV, STENCIL and MRI were also accelerated using MXP. For FFT, we could get throughput of 0.699 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For KMEANS, we could get throughput of 0.9143 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For MM, we could get throughput of 0.62 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For SPMV, we could get throughput of 0.55 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For STENCIL, we could get throughput of 0.589 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. For MRI, we could get throughput of 0.388 (Gops/sec) which is greater than SIMD NEON unit and ARM v7 processor. The above results are mentioned for the word (32-bits) level operation whereas this thesis covers the throughput measurement at byte (8-bits) and halfword (16-bits) level also.
+
+
+
+Polybench kernels, ATAX and BiCG were accelerated using MXP. For ATAX, we could get speedup of ${\approx}6$ for small dataset size and ${\approx}5$ for standard dataset size. For BiCG, we could get speedup of ${\approx}7$ for small dataset size and ${\approx}3$ for standard dataset size.
+
+
+
+We also accelerated an image processing application using the MXP overlay and measured the runtime. The time took by the MXP was 0.03686 milliseconds for image having dimension as 128 X 128 pixels and 0.1843 milliseconds for image having dimension as 256 X 256 pixels. The speedup provided by the MXP overlay was very high when compared with the speedup provided by ARM v7, NEON SIMD unit and INTEL i3 processors. SpMV existing benchmarking framework was configured such that MXP APIs can be used to accelerate SpMV computational kernel.
+
+
+
+\section{Future Work}
+
+\subsection{Power Analysis}
+In our work, focus was more on throughput (Gops/sec) as one of the performance parameter. We can run different MXP applications and measure the power dissipated. The power rails of the ZedBoard gives some hints of measuring the power for the application running on the ZedBoard. 
+
+\subsection{Audio Processing Application}
+Building an audio processing application and accelerating it using the MXP overlay. The performance analysis for the audio processing application and its comparison with the other embedded hard processors like ARM v7, SIMD NEON unit and INTEL i3.
+
+\subsection{Completion of the SpMV Benchmarking Framework}
+The current existing SpMV benchmarking framework consist of different block routines that divide the input sparse dense matrix into different blocks and then process it i.e. BCSR (Blocked Compressed Sparse Row). The MXP APIs can be used to build and change the entire block routines to accelerate the SpMV computational kernel.  
+

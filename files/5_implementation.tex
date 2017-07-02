@@ -1,0 +1,1403 @@
+\chapter{Implementation on FPGA Overlays}
+\label{ch5_implementation}
+
+In this chapter, we present the implementation methodology of compute kernels on FPGA overlay architectures.
+We map the compute kernels on two types of FPGA overlay architectures, linear dataflow overlay and island-style overlay.
+We make use of python-graph library to develop a set of tools for finding overlay design parameters for a set of compute kernels.
+We focus on efficient and cost-effective implementation of overlay architectures by performing a detailed analysis of kernels using proposed tools.
+The detailed discussion is shown in the following sections.
+
+%\section{Mapping on Spatially-programmed Overlay}
+\section{Linear Data Flow Overlay}
+As discussed in the previous section, DSP-aware DFGs contains DSP block as nodes which can be mapped spatially on a programmable architecture designed using DSP block as a functional unit.
+The array of functional units (DSP blocks) can be interconnected using different kind of programmable interconnect architectures such as island-style or linear dataflow-style (LDF-style).
+We use LDF-style for interconnecting functional units as shown in the Fig. \ref{ldfblk}.
+This LDF-style overlay facilitates an efficient and cost effective implementation of compute kernels. 
+We calculate the programmability cost of LDF-style overlay for implementing a set of benchmarks and compare it with the cost of island-style overlay.
+
+\subsection{Architecture}
+As shown in Fig. \ref{ldfblk}, LDF-style overlay is a linear array of programmable tiles where each tile contains a programmable routing network and a cluster of DSP blocks and delay lines (DLs). 
+Delay lines are required in each cluster for bypassing inputs of the tile to the outputs by delaying them equivalent to the latency of DSP blocks.
+The number of DSP blocks, delay lines and the complexity of routing network in each tile can be customized according to the set of benchmarks.
+Hence customized overlays can be designed with a low programmability cost for a set of benchmarks.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=10cm]{figures/ldfoverlay.pdf}
+	\caption{Block diagram of linear dataflow overlay.}
+	\label{ldfblk}
+\end{figure}
+
+\subsection{Programmability-cost Modelling }
+For each tile, number of DSP blocks, delay lines and the routing network complexity can be decided based on a set of benchmarks.
+The complexity of routing network in $n^{th}$ tile depends on the resources (number of DSP blocks and delay lines) of $n^{th}$ tile and $(n+1)^{th}$ tile.
+If $X_{n}$ and $Y_{n}$ are the number of DSP blocks and delay lines in $n^{th}$ tile, 
+The routing network can be designed using ($X_{n}+Y_{n}$) x ($4*X_{n+1}+Y_{n+1}$) crossbar switch, where $X_{n}$ and $Y_{n}$ are the number of DSP blocks and delay lines in $n^{th}$ tile and $X_{n+1}$ and $Y_{n+1}$ are the number of DSP blocks and delay lines in $(n+1)^{th}$ tile.
+If $L_{n}$ is the number of LUTs/bit to design ($X_{n}+Y_{n}$):1 multiplexer, the programmability cost of the overlay network would be equal to $\displaystyle\sum_{n=1}^{N-1} (L_{n}*(4*X_{n+1}+Y_{n+1}))$ LUTs/bit, where N is the number of tiles in the overlay.
+If the overlay needs to support immediate data for operations as well, the DSP inputs needs to support an additional muxing input and the network complexity can be calculated as a ($X_{n}+Y_{n}+1$) x ($4*X_{n+1}$) crossbar switch and a ($X_{n}+Y_{n}$) x ($Y_{n+1}$) crossbar switch. Assuming worst case scenario which is 1/2 LUT/bit increase on increasing additional muxing input, the ($X_{n}+Y_{n}+1$):1 multiplexer would consume $(L_{n}+1/2)$ LUTs/bit and hence the programmability cost of the overlay network would be equal to $\displaystyle\sum_{n=1}^{N-1} (L_{n}*(4*X_{n+1}+Y_{n+1}) + 2*X_{n+1})$ LUTs/bit.
+Fig. \ref{muxcost} shows the LUT requirement on scaling the size of multiplexers.
+%The additional factor of $\displaystyle\sum_{n=1}^{N-1} (2*X_{n+1})$ LUTs/bit is the upper bound which can be reduced by carefully designing immediate operation free tiles.
+
+\input{figures_tex/graphL}
+
+\textbf{Finding overlay design parameters (N, $X_{n}$ and $Y_{n}$) for a set of graphs:}
+Given a set $G$ of M graphs, each graph can be scheduled using well known scheduling techniques (ASAP, ALAP, LIST etc.) to generate sequenced graph which can be used to find out the number of nodes and crossing edges in each stage. We refer to the number of nodes in $n^{th}$ stage as $g_{m}x_{n}$, total stages as $Ng_{m}$ and crossing edges as $g_{m}y_{n}$ in $m^{th}$ graph $G_{m}$.
+$X_{n}$ and $Y_{n}$ can be found out using equation 2.1 and 2.2.
+
+\begin{equation}
+X_{n} = \max (g_{1}x_{n}, g_{2}x_{n}, g_{3}x_{n}, ...g_{M}x_{n})
+\end{equation}
+\begin{equation}
+Y_{n} = \max (g_{1}y_{n}, g_{2}y_{n}, g_{3}y_{n}, ...g_{M}y_{n})
+\end{equation}
+\begin{equation}
+N = \max (Ng_{1}, Ng_{2}, Ng_{3}, ...Ng_{M})
+\end{equation}
+
+For generating the minimum value of N, $X_{n}$ and $Y_{n}$, each graph have to be first scheduled optimally (each graph can be scheduled using different scheduling technique or even using different scheduling parameteres). Design space exploration is quite large in such a scenario and hence we started with some simple experiments. 
+We decided to use ASAP scheduling for all graphs to generate overlay design parameters.
+
+\section{Set-specific cost calculation using ASAP scheduling}
+In this section, we calculate overlay design parameters and programmability cost using ASAP scheduling of a set of graphs
+We considered an example set of composite DFGs as shown in Table \ref{example_set} to demonstrate the process of finding the parameters.
+\input{tables/example_set}
+
+The example set contains five small polynomials requiring up-to 7 DSP blocks as shown in Fig. \ref{example_set_poly}. 
+So ideally a network of 7 DSP blocks should be able to map all of the kernels in the example set.
+Most obvious way of designing the overlay is to have similar tiles having same number of DSP blocks and delay lines. This technique would result in a wastage of resources since the number of operation nodes decreases on moving from one stage to next stage. 
+%This phenomenon is reflected in Figure \ref{example_set_poly} which shows the graphs in the example set. 
+
+\input{figures_tex/example_poly}
+
+In order to analyze the graphs and to find a valid schedule, we use a python module to implement ASAP scheduling algorithm as shown in the Fig. \ref{code_asap}.
+It is important to note that only 40 lines of code is required to implement the ASAP scheduling algorithm.
+As shown in the code, we have used an API ($graph.incidents(node)$) from python-graph library to find the parents of the node. 
+$asap\_schedule$ can be used as an API as part of the DFG scheduling library.
+The input to this API is a graph and the output of the API is a sequenced graph and the minimum latency.
+With the help of the sequenced graph, we can find out the maximum number of nodes in each stage as well as the number of bypass lines required.
+
+\input{figures_tex/code_asap}
+
+For example, the sequenced graph of the kernel "Poly3" is:
+\begin{itemize}
+	\item $Input$ $Stage$: $[N1, N2, N3, N4, N5, N6]$
+	\item $Stage 1: [N12, N10, N7, N13]$
+	\item $Stage 2: [N8, N9]$
+	\item $Stage 3: [N11]$
+	\item $Output Stage: [N14]$	
+\end{itemize}
+
+We can find out $x_{n}$ and $y_{n}$ for graphs using the information of the sequenced graph.
+For example, for $Poly3$, $x_{n}$ is $(4, 2, 1, 1, 0)$ and $y_{n}$ is $(0, 1, 0, 0, 0)$.
+We use ASAP scheduling for all the graphs in example set and generate the results as shown in Table \ref{calcoverlay}.
+We find $X_{n}$ as $(4, 2, 1, 1, 1)$ and $Y_{n}$ as $(2, 3, 1, 1, 0)$ from the Table \ref{calcoverlay}.
+
+\begin{table}[!h]
+	\centering
+	\caption{Calculation of Overlay Parameters}
+	\label{calcoverlay}
+	\scriptsize
+	\begin{tabular}{ll}
+		%    \toprule
+		\multicolumn{1}{c}{(a) Calculation of $X_{n}$}  &\multicolumn{1}{c}{(b) Calculation of $Y_{n}$} \\ % Assembly with Loopback Optimization
+		%    \midrule
+		%    \hspace{-0.2in}
+	\begin{tabular}{ccccccc}
+		\toprule
+		$X_{n}$		& $g_{1}x_{n}$		& $g_{2}x_{n}$		& $g_{3}x_{n}$		& $g_{4}x_{n}$	& $g_{5}x_{n}$ 		& $max$ 	\\
+		\midrule	                                                                    	            	                                    	
+		$X_{1}$		&  4  				& 3					& 4					& 2		& 1					& 4			\\
+		$X_{2}$		&  1  				& 2					& 2					& 1		& 1					& 2			\\
+		$X_{3}$		&  1   				& 1					& 1					& 1		& 1					& 1			\\
+		$X_{4}$		&  1   				& 1					& 1 				& 0		& 1					& 1			\\
+		$X_{5}$		&  0   				& 0					& 0 				& 0		& 1					& 1			\\		
+		\bottomrule	                                                                       
+		
+	\end{tabular}
+		&
+		%    \hspace{-0.2in}
+	\begin{tabular}{ccccccc}
+		\toprule
+		$Y_{n}$		& $g_{1}y_{n}$		& $g_{2}y_{n}$		& $g_{3}y_{n}$		& $g_{4}y_{n}$		& $g_{5}y_{n}$ 		& $max$ 	\\
+		\midrule	                                                                    	            	                                    	
+		$Y_{1}$		& 1     			& 0					& 0					& 2		& 1					& 2			\\
+		$Y_{2}$		& 3    				& 2					& 1					& 0		& 1					& 3			\\
+		$Y_{3}$		& 0     			& 0					& 0					& 0		& 1					& 1			\\
+		$Y_{4}$		& 0    				& 0					& 0 				& 0		& 1					& 1			\\
+		$Y_{5}$		& 0    				& 0					& 0 				& 0		& 0					& 0			\\		
+		\bottomrule	                                                                       
+		
+	\end{tabular}
+		%    \bottomrule
+	\end{tabular}
+	
+	
+	
+	
+\end{table}
+
+We use $X_{n}$ and $Y_{n}$ to calculate the cost of the overlay designed specifically for the example set of graphs.
+The cost can be calculated as $\displaystyle\sum_{n=1}^{N-1} (L_{n}*(4*X_{n+1}+Y_{n+1}))$ LUTs/bit.
+By feeding the values of $X_{n}$ and $Y_{n}$ in the equation, we find the cost as 920 LUTs for a 16-bit overlay.
+
+
+\section{Resource-budget based set-determination using ASAP scheduling}
+Now since we can calculate set-specific cost, we determine the set of graphs which can be accommodated within a specified resource budget.
+We start with all of the graphs in benchmark set and calculate the cost for the same.
+We call the graph whose removal from the set results in maximum reduction in cost as dominant graph and plot the cost for the multiple sets as shown in Fig.~\ref{procost}.
+The Y axis of the graphs shows the programmability cost, the number of LUTs, and the X axis presents the dominant graph for the set containing graph lying on the right side of the dominant graph.
+For example, the programmability cost is 920 LUT for the set which is having mibench as dominant graph and the set as {poly4, poly1, poly3, poly2, chebyshev}.
+It is clear from the Fig.~\ref{procost} that an overlay can be designed for all of the benchmarks with a programmability cost of 33480 LUTs.
+
+
+
+\input{figures_tex/budgetgraph}
+
+
+
+
+Now from the Fig.~\ref{procost} we can find out the set for a given resource budget as shown in Table~\ref{budgetset}.
+For example, resource budget of 1000 LUTs can allow a set of 5 graphs which were shown in Fig.~\ref{example_set_poly}.
+We can further reduce the programmability cost of the sets using our proposed parameter finding approach.
+
+
+\begin{table}[!h]
+	\renewcommand{\arraystretch}{1.3}
+	\caption{Resource-budget based set determination}
+	\label{budgetset}
+	\centering
+	%\tiny
+	\scriptsize
+	\begin{tabular}{ccc}
+		\toprule
+		Resource budget & Benchmark Set & Overlay Cost \\
+		\midrule                                                                                  1000           & set 1 (poly1, poly2, poly3, poly4, chebyshev)    & 920                    \\
+		2000                                       & set 2 (set 1, mibench, sgfilter, radar)                      & 1904                             \\                           
+		4000                                       & set 3 (set 2, stencil, HornerBezier, mri)                  & 3248                                            \\
+		8000                                       & set 4 (set 3, poly5, poly8, conv, kmeans, poly7, fft) & 7712 \\
+		16000                                    & set 5 (set 4, qspline, spmv, MotionVector, mm, fir2, arf) & 15656\\
+		32000                                    & set 6 (set 5, poly6, ewf)  & 25144                                                        \\
+		\bottomrule                                                                             
+		
+	\end{tabular}
+\end{table}
+
+
+
+%The following code has been used to generate the cost for all the graphs in a set and finding the minimum among them.
+
+
+
+\section{Finding optimal overlay design parameters for reducing cost }
+As we have seen from the previous section, the programmability cost of the overlay designed for the graphs in set-1 is 920 LUTs using ASAP scheduling for generating sequenced graph.
+We can further reduce this cost by using different scheduling for different graphs in the set and that can be done by efficiently moving nodes within stages by putting a constraint on maximum number of nodes in a stage.
+
+\input{figures_tex/code_alap}
+
+
+List scheduling actually does something similar in which we provide a resources constraint and then generate the sequenced graph. 
+%explain mobility and put ALAP codeand mobility code
+While doing the list scheduling, we use the sequencing graph of the ASAP scheduling and schedule the nodes in each stage based on the mobility of the node.
+If the number of nodes in a stage are less than the resources available then the sequencing graph is similar to that of an ASAP. But if the maximum number of nodes in a stage are greater than the resources available then the nodes are scheduled based on their mobility. 
+Mobility of a node indicates the range of node in which it can be scheduled. Operations with smaller mobility are given higher priority as they have fewer stages in which the operation can be scheduled. To find the mobility, we initially perform the ASAP and ALAP schedule of the graph and find the difference of the stages for a node scheduled in ASAP and ALAP. This gives the mobility for a specific node and becomes a criteria for List scheduling. The code for ASAP and ALAP is shown in Fig. \ref{code_asap} and Fig. \ref{code_alap} respectively. 
+
+
+%\input{figures_tex/optimal_cost}
+
+
+
+
+
+For example if we consider, the scheduling of Poly3 graph on a resource constraint architecture. We get the results as shown in the table \ref{list.tbl}. The API $list\_schedule$ is created which performs the list scheduling on the graph given as an input along with the scheduling parameter. Scheduling parameter can be described as the resource constraint in each stage. It is clear from the table that on constraining the resources in a stage the depth increases.
+
+\begin{table}[!h]
+	\centering
+	\caption{List Scheduling of Poly3 Graph}
+	\label{list.tbl}
+	\scriptsize
+	\begin{tabular}{ll}
+
+		    %\toprule
+		(a) $Resource$ $Constraint$ $=$ $2$  	\\
+%		&\multicolumn{1}{c}{(c) $Resource$ $Constraint$ = $4$}		\\ % Assembly with Loopback Optimization
+		    %\midrule
+		    \hspace{-0.2in}
+		\begin{tabular}{cc}
+			\toprule
+			$Stage$		& $Sequencing Graph$	 	\\
+			\midrule	                                                                    	            	                                    	
+			$Input$		&  $['N1', 'N2', 'N3', 'N4', 'N5', 'N6']$  			\\
+			$1$		&  $['N12', 'N10']$  							\\
+			$2$		&  $['N7', 'N13']$  							\\
+			$3$		&  $['N8', 'N9']$  							\\
+			$4$		&  $['N11']$  							\\
+			$Output$		&  $['N14']$  							\\		
+			\bottomrule	                                                                       
+			
+		\end{tabular}
+
+	\end{tabular}
+\begin{tabular}{ll}
+
+	%\toprule
+	(b) $Resource$ $Constraint$ $=$ $3$ &(c) $Resource$ $Constraint$ = $4$		\\
+	%		&\multicolumn{1}{c}{(c) $Resource$ $Constraint$ = $4$}		\\ % Assembly with Loopback Optimization
+	%\midrule
+	\hspace{-0.2in}
+		%    \hspace{-0.2in}
+
+		%    \hspace{-0.2in}
+		\begin{tabular}{cc}
+			
+			\toprule
+			$Stage$		& $Sequencing Graph$	 	\\
+			\midrule	                                                                    	            	                                    	
+			$Input$		&  $['N1', 'N2', 'N3', 'N4', 'N5', 'N6']$  			\\
+			$1$		&  $['N12', 'N10', 'N7']$  							\\
+			$2$		&  $['N13', 'N8', 'N9']$  							\\
+			$3$		&  $['N11']$  							\\
+			$Output$		&  $['N14']$  							\\		
+			\bottomrule	                                        
+                            
+		\end{tabular}
+		&
+		\begin{tabular}{cc}
+			\toprule
+			$Stage$		& $Sequencing Graph$	 	\\
+			\midrule	                                                                                	                                    	
+			$Input$		&  $['N1', 'N2', 'N3', 'N4', 'N5', 'N6']$  			\\
+			$1$		&  $['N12', 'N10', 'N7', 'N13']$  							\\
+			$2$		&  $['N8', 'N9']$  							\\
+			$3$		&  $['N11']$  							\\
+			$Output$		&  $['N14']$  							\\		
+			\bottomrule	                                               	
+		\end{tabular}
+	\end{tabular}
+\end{table}
+
+
+
+To explain our approach of finding optimal overlay parameters, let $S$ equal to [maximum graph width - 1] among $G$ number of graphs present in the set.
+We can set a resource constraint varying from 2 to $S+1$ while scheduling each graph using list scheduling. 
+This means that $S$ sequencing graphs can be generated for each graph present in the set. Now we can generate $S^{G}$ programmability costs for all the possible combinations of graphs and their scheduling choices.
+For example, in case of set-1, $S = 3$ and $G = 5$. 
+Thus there are $3^{5}$ possible choices for overlay parameters.
+We find the cost for all the possible combinations and consider the minimum cost for the specific set of values of $X_{n}$ and $Y_{n}$. These values of X and Y enable us to design an overlay which will fit all the the graphs in a set.
+We have considered an example for set - 1 and their parameters are shown in Table \ref{listcost.tbl}
+We have not considered inputs while doing the calculation.
+%We have considered 5 graphs in set - 1. 
+The maximum number of scheduling that can be considered are 4 as maximum utilization of a graph in a stage is 4, therefore the sequencing graph will be same as ASAP if we consider more resources for this particular set. 
+
+
+\input{figures_tex/listcost}
+
+
+
+To find the minimum cost of this set we have to consider one scheduling of each graph and thus we will have $3^{5}$ possible sets each giving a programmable cost for that specific set. 
+In Table \ref{listcost.tbl} we have the values of $X_{n}$ and $Y_{n}$, thus by forming various sets of each schedule for a graph we can find the X (Max of $X_{n}$) and Y (Max of $Y_{n}$) for a specific set and further calculate the cost. There would be some repetitive cases while considering the scheduling for graphs. As in chebyshev the graph width is 1 so all the schedules in chebyshev will be similar to its ASAP schedules as it has only one node in each stage. 
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=12cm]{figures/output.png}
+	\caption{Output Screenshot for a set of graphs} %\cite{avnet_2012}}
+	\label{costoutput}
+\end{figure}
+
+For $set - 1$ we will have 1 unique schedule for chebyshev, 3 unique schedules for poly1, 2 unique schedules for poly2, 3 unique schedules for poly3 and 1 unique schedule for poly4. Thus there would be 1$\times$3$\times$2$\times$3$\times$1 = 18 unique costs for $set - 1$. X and Y of these 10 schedules are shown in Table \ref{listcost.tbl}. All these combinations are handled by our tool and it gives the minimum cost for a set of graph. The input given to this tool are the number of graphs, Max graph width and the dot files of the graphs. The output of this tool is the Min cost, Max cost and ASAP cost along with the value of X, Y and the Schedule Paramater. This output can be seen in Fig \ref{costoutput} and the code for finding the Min, Max and ASAP cost can be seen in Fig \ref{costcode}. Fig \ref{costgraph} shows the cost of various possible sets of overlay parameters for set - 1. As explained earlier, there would be maximum of 18 unique cost for this set of graph which can be seen in Fig \ref{costgraph}. 
+
+From the graph we see that Max cost is greater than the ASAP cost. There could be some combinations of graphs with certain schedulability such as one graph has more operations at the initial stages whereas the other graph in a set has most of its operations in the mid stage, then the max cost of such a set would definitely be more than ASAP. Max cost would be always be equal to or greater than ASAP cost. Thus the schedule corresponding the max cost is a worst way of designing an overlay that can fit the desired set of graph.
+
+\input{figures_tex/costgraph}
+
+After finding the minimum cost for a specific set of graph, we considered all the benchmarks and found out the most dominating graph among the lot and then the cost after removing the same. Dominating graph is the one whose removal from the set results in maximum decrease in the cost of the set. This helped us in finding out the most dominating graph in a set of benchmark which would be mostly responsible for the large overlay design relatively as compared to other graphs in a set. Thus if we have a resource constraint and our goal is to fit maximum number of graphs from a set of benchmarks then we would eliminate the most dominating graphs from the set until we meet the resource constraint. Thus elimination of dominating graphs from the set would result in effective utitlization of resources rather than randomly removing graphs from a set. 
+
+\input{figures_tex/dominating_code}
+
+Fig \ref{dominating_code} shows the code for finding the dominating graph among the set of benchmarks and the cost after removing the same. The output of the code is shown in Fig \ref{dominating_graph}.
+
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=12cm]{figures/dominating_graph.png}
+	\caption{Output Screenshot showing the dominating graph along with the cost} %\cite{avnet_2012}}
+	\label{dominating_graph}
+\end{figure}
+
+ We see that in a set of 5 graphs : chebyshev, poly1, poly2, poly3 and poly4 the most dominaing one is poly4 as there is maximum reduction in cost by removing the same from the set. Thus cost for set - 1 is 920 and cost after removing poly4 is 752. This is the minimum resource requirement if we want to fit 4 graphs from set - 1 by using minimum resources. Same approach has been used to create the Fig \ref{optimal_cost}. 
+ We initially considered a set of 26 graphs and then kept on removing the dominating graph and found the cost after removing the same. Cost reduction is shown in Table \ref{costreduction}
+
+\input{figures_tex/optimal_cost}
+
+
+\begin{table}[!h]
+	\renewcommand{\arraystretch}{1.3}
+	\caption{Cost reduction using proposed approach}
+	\label{costreduction}
+	\centering
+	%\tiny
+	\scriptsize
+	\begin{tabular}{ccc}
+		\toprule
+		benchmark set 																& Overlay Cost (ASAP approach)	& Overlay Cost (new approach)		\\
+		\midrule                                                                                                
+		set 1 (poly1, poly2, poly3, poly4, chebyshev)   							& 920                     		& 752                     			\\
+		set 2 (set 1, mibench, sgfilter, radar)			       						& 1904                          & 1536                              \\                           
+		set 3 (set 2, stencil, HornerBezier, mri)		             				& 3248                          & 2704                              \\
+		set 4 (set 3, poly5, poly8, conv, kmeans, poly7, fft) 						& 7712 							& 5296 								\\
+		set 5 (set 4, qspline, spmv, MotionVector, mm, fir2, arf) 					& 15656 						& 11216 							\\ 
+		set 6 (set 5, poly6, ewf)   												& 25144                         & 17312                             \\
+		\bottomrule                                                                             
+		
+	\end{tabular}
+\end{table}
+
+
+
+\input{figures_tex/costcode}
+
+\section{Comparison with Island-style FPGA Overlay}
+We analyze the mapping of kernels on DSP block based island-style overlay and compare the programmability cost with linear overlay.
+Table \ref{island} shows the required size of island-style overlay for each benchmark.
+
+\input{tables/island}
+
+According to this table, we calculate the programmability cost of graphs sets described in the previous section.
+A programmability cost of 440 LUTs per tile was shown in~\cite{fccm2015-jain} based on which we calculate the cost for the sets.
+Table \ref{cost_comparison} shows the required overlay size for the sets and programmability cost comparison.
+
+\begin{table}[!h]
+	\renewcommand{\arraystretch}{1.3}
+	\caption{Programmability cost comparison}
+	\label{cost_comparison}
+	\centering
+	\tiny
+	%\scriptsize
+	\begin{tabular}{cccc}
+		\toprule
+		benchmark set 															& Required Size			& Island-Cost 			& ASAP/proposed (linear cost)				\\
+		\midrule                                                                                                                      
+		set 1 (poly1, poly2, poly3, poly4, chebyshev)   						& 3$\times$3  (CW=2)	& 3960              	& 920/752              						\\
+		set 2 (set 1, mibench, sgfilter, radar)			       					& 4$\times$4  (CW=2)	& 7040              	& 1904/1536                             	\\                           
+		set 3 (set 2, stencil, HornerBezier, mri)		             			& 5$\times$5  (CW=2)	& 11000              	& 3248/2704                           		\\
+		set 4 (set 3, poly5, poly8, conv, kmeans, poly7, fft) 					& 8$\times$8  (CW=2)	& 28160 				& 7712/5296									\\
+		set 5 (set 4, qspline, spmv, MotionVector, mm, fir2, arf) 				& 10$\times$10  (CW=2)	& 44000 				& 15656/11216								\\ 
+		set 6 (set 5, poly6, ewf)   											& 10$\times$10  (CW=2)	& 44000             	& 25144/17312                     			\\
+		\bottomrule                                                                             
+		
+	\end{tabular}
+\end{table}
+
+The data in Table \ref{cost_comparison} is shown in Fig. \ref{islandvslinear} and it is clear from the table that the programmability cost can be reduced drastically using linear dataflow style overlays.
+We observe upto 77\% reduction in cost for sets using ASAP based approach and upto 81\% reduction using proposed approach as shown in Fig \ref{costreduction}.
+
+\input{figures_tex/islandvslinear}
+\input{figures_tex/costreduction}
+
+\section{Summary}
+In this chapter, we presented linear dataflow overlay architecture, programmability cost modelling, cost calculation using sequenced graphs (ASAP scheduled), cost reduction by proposed approach, cost comparison with island-style overlays.
+We observe upto 77\% reduction in cost for sets using ASAP based approach and upto 81\% reduction using proposed approach compared to island-style overlays.
+
+
+%
+%The programmability cost of the overlay 
+%Hence the problem of designing LDF-style overlay for a set of benchmark becomes the problem of finding optimal number of DSP blocks and delay lines in each tile.
+%
+%$\displaystyle\sum_{n=1}^{10} n^{2}$
+%
+%We can create benchmark sets where each set max
+%We show that the programmability cost of tall-skinny graphs
+%%The complexity of routing network in the tile will depend on two factors, the data crossing between two tiles and also on the DSP cluster size in the next tile.
+%
+%
+%
+%
+%Given a set of benchmarks, a LDF-style overlay can be designed by choosing the minimum required DSP cluster size and network complexity in each tile.
+%
+%The simplest way to map a composite DFG on the overlay is to perform ASAP scheduling and map the nodes in each stage on the DSP cluster of the tile.
+%
+%
+%\section{Mapping on Temporally-programmed Overlays}
+%
+%\subsection{Mapping on NN-style Overlay}
+
+%\begin{itemize}\itemsep1pt \parskip0pt
+%\item AXI\_GP -- two 32-bit master and two 32-bit AXI general purpose (GP) slave interfaces
+%\item AXI\_HP -- four 64-bit/32-bit configurable, buffered AXI high performance (HP) slave interfaces with direct access to DDR and on chip memory
+%\item AXI\_ACP -- One 64-bit AXI accelerator coherency port (ACP) slave interface for coherent access to CPU memory
+%\end{itemize}
+%
+%We have used \ac{EDK} for the system design.
+%\ac{XPS} has been used to automatically generate custom AXI based peripherals.
+%A peripheral connects to AXI interconnect through corresponding AXI IP interface (IPIF) modules, which provides a quick way to implement interface between AXI interconnect and the user logic. A peripheral can have either a slave interface or a master interface. 
+%Slave interface typically required by most peripherals for operations like logic control, status report etc.
+%Block diagrams of AXI4-Lite and AXI IP interfaces are shown in and Fig. \ref{axi_lite} and Fig. \ref{axi} respectively.
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=12cm]{figures/axi_lite.pdf}
+%\caption{AXI4-Lite IPIF Block Diagram.}
+%\label{axi_lite}
+%\end{figure}
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=12cm]{figures/axi.pdf}
+%\caption{AXI4 IPIF Block Diagram.}
+%\label{axi}
+%\end{figure}
+%
+%Master interface is typically required by complex peripherals like DMA controller for commanding data transfers between regions.
+%XPS also provides a BFM simulation platform so that user can verify the functionality of the generated peripheral.
+%We generated following custom peripherals in the PL using XPS base system builder (BSB) in order to communicate with the PS:
+%
+%\begin{itemize}\itemsep1pt \parskip0pt
+%\item AXI-lite based Register peripheral -- user specific SW accessible registers (upto 32) interface for operations like logic control, status report etc.
+%Fig. \ref{axi_reg_interface} shows one example of the register peripheral having 4 registers.
+%\item AXI based Memory peripheral  -- user specific memory regions (upto 8) to provide local storage of data in PL. 
+%It supports burst transfer by default. This feature provides higher data transfer rates when using DMA controller for transactions.
+%Fig. \ref{axi_bram_interface} shows one example of the memory peripheral having 4 block RAMs.
+%\end{itemize}
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=15cm]{figures/axi_reg_interface.pdf}
+%\caption{AXI4-Lite based Register Peripheral.}
+%\label{axi_reg_interface}
+%\end{figure}
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=15cm]{figures/axi_bram_interface.pdf}
+%\caption{AXI4 based Memory Peripheral.}
+%\label{axi_bram_interface}
+%\end{figure}
+%
+%%Zedboard, a development board, have been used as test platform which consists of Zynq-7020 device. 
+%%This platform is ideal for rapid prototyping and proof-of-concept development.
+%%Two kinds of experiments have been conducted on this platform-
+%%
+%%\textbf{Bare-metal Experiments}
+%%
+%%%Bare metal experiments are conducted on a software system without any OS.
+%%%This mode has higher throughput when compared to the OS mode and is also less complex.
+%%Bare-metal Runtime environment is simple and single-threaded one which provides basic functions to support applications. 
+%%%Bare-metal device driver architecture is of layered type in order to support portability. 
+%%%It contains a direct hardware interface for  development of custom code.
+%%In Bare-metal mode, hardware platform data files and bare-metal Board support package(BSP) are created. 
+%%The BSP contains low level libraries and drivers. 
+%%These are then used to develop our custom application.
+%%
+%%The hardware platform files are:
+%%\begin{itemize}\itemsep1pt \parskip0pt
+%%\item Hardware Description file(.xml) - Description of processors,peripherals and memory map.
+%%\item Bitstream (.bit) -PL configuration data
+%%\item Block RAM Memory Map (.bmm) - Memory mapping details
+%%\item PS configuration data used by FSBL.
+%%\end{itemize}
+%%
+%%The steps involved in Bare metal application development are-
+%%\begin{itemize}\itemsep1pt \parskip0pt
+%%\item XPS import of Hardware platform information
+%%\item Bare-metal BSP creation
+%%\item Bare-metal Application creation
+%%\item Application build
+%%\item Hardware programming and running the application
+%%\item Application debug
+%%%\item Custom driver support
+%%\end{itemize}
+%% 
+%%\textbf{Linux OS based Experiments}
+%%
+%%Xillinux have been used for these experiments which comes with Xillybus infrastructure. 
+%%%Even though there is little overhead in this mode of operation, increase in clock frequency has made this value negligible.
+%%In Linux mode, hardware platform data files are created which contains files similar to that of bare-metal case except for the PL configuration file which is optional.
+%%Linux device drivers are loadable kernel modules.
+%%They pave way for compact codes and also can extend the kernel functionality without system reboot.
+%%They provide hardware abstraction to the kernel.
+%%
+%%The steps involved in OS application development are-
+%%\begin{itemize}\itemsep1pt \parskip0pt
+%%\item Booting Linux
+%%\item Application creation
+%%\item Application build
+%%\item Running the application
+%%\item Application debug
+%%%\item Custom driver support
+%%\end{itemize}
+%%
+%%%\textbf{Experimental Setup}
+%%%Power- Power plug is connected to the power socket.
+%%%
+%%%Serial communication - USB A-mini B connector is connected between the PC and Zedboard. JTAG is also used during slave boot-up configuration.
+%%%
+%%%Ethernet connection -   RJ-45 cable is connected between the Zedboard's RJ-45 port and PC in master boot up configuration.
+%%%
+%%%Jumper configuration - The jumper bank must be set properly. The major difference in jumper settings between the master and slave boot up configurations are that [JP8:JP9:JP10] are set to [1:1:0] for SD card boot and [0:0:0] for JTAG boot.
+%%
+%%
+%%
+%%\textbf{Transfer techniques}
+%%
+%%Zynq supports different mechanisms of data transfer between the PS and PL. These techniques are analyzed below.
+%%
+%%\textit{PIO} :-
+%%It is the most simple method of data transfer using less resources.It has a low throughput of 25 MBps.PIO has more latency due to the communication overhead of AXI bus. This is overcome by transferring a block of data using DMA.
+%%
+%%\textit{PS DMA} :-
+%%This method provides medium throughput but supports multiple channels.DMA programming is complex but theoretical throughput is 600 MBps.PS DMA is optimal for large data sizes.PL-330 DMAC is similar to an embedded microcontroller. Configuring it is like compiling a program therefore it is slower. DMAC has 3 modes of operation - Burst mode, Cycle stealing and transparent mode. Zynq DMAC is connected to the central interconnect.
+%%
+%%\textit{PL DMA using HP} :-
+%%This method provides OCM or DDR access via multiple interfaces. PL acts as the master and its design is complex but theoretical throughput achievable is highest 1200 MBps.
+%%
+%%\textit{PL DMA using ACP} :-
+%%ACP ports helps in cache coherency but at the same time may cause cache thrashing for large bursts. Its main drawback is that it shares processor interconnect bandwidth. Throughput achievable is 1200 MBps.
+%%
+%%
+%%\begin{center}
+%%\textbf{\underline{\large BAREMETAL EXPERIMENTS}}
+%%\end{center}
+%
+%We evaluated the performance of all three ports ie.\textit{GP,HP and ACP} by analyzing the communication between above mentioned peripherals and PS as discussed in further sections.  These are then used along with the Linux kernel to develop our custom application. 
+%
+%\section{GP ports}
+%AXI\_GP interfaces are connected directly to the ports of master interconnect and slave interconnect, without any additional FIFO buffering, unlike the AXI\_HP interfaces which has elaborate FIFO buffering to increase performance and throughput.
+%In order to make use of GP master port, there are two communication mechanisms:
+%\begin{itemize}\itemsep1pt \parskip0pt 
+%\item PIO based
+%\item PS-DMA based
+%\end{itemize}
+%
+%In both of these methods, GP master port can be used to communicate with a slave peripheral. 
+%Slave can either be a register peripheral or a memory peripheral.
+%In the next sections, we first describe these two methods in detail and then present the characterization of GP ports.
+%
+%\subsection{PIO based}
+%One method of HW-SW communication in Zynq is to use Programmed IO (PIO) transfers from PS to PL. It requires no extra resources via GP master port.
+%The CPU controls the data movement between main memory and the PL and hence latency between two transactions is quite high (150 ns) which corresponds to a bandwidth of approximately 25 MB/s (for data channel width = 4 byte). Thus, PIO is not suitable for large data transactions but is suitable for small data transaction (less than 1KB) and for controlling user registers like control and status register.
+%
+%\subsection{PS-DMA based}
+%It is a method of transferring data via GP master port without processor intervention. 
+%PS-DMA controller takes a chunk of data from main memory and sends it to PL. 
+%The processor is free during this transfer and interrupted by the DMA controller at the end of data transfer. 
+%This hard DMA controller is able to perform MM-MM burst transactions and does not require any FPGA resources. 
+%
+%%The DMA controller has 8 channels- 4 for PS and 4 for PL.
+%%DMA transfers are performed using a 64 bit master interface working at twice the clock rate. 
+%%AXI read and write transactions are buffered using multi-channel FIFO (MFIFO).
+%
+%%The PL-PS DMA interface is established with two AXI interfaces with handshaking.
+%This method is suitable for applications with moderate bandwidth requirement (upto 80 MB/s) but normally faces the problem of large setup time overhead.
+%A Multichannel First-In-First-Out (MFIFO) data buffer is used to store read/write data during DMA transfer.
+%Theoretical maximum performance is 600MB/s. Xilinx provides bare metal SW drivers for PS DMA.
+%The connectivity diagram is shown in Figure \ref{PS_DMA}. 
+%
+%
+%%Ref Zynq TRM pg:630
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=10cm]{figures/PS_DMA.pdf}
+%\caption{PS DMA Connectivity Diagram.}
+%\label{PS_DMA}
+%\end{figure}
+%
+%\subsection{Characterization}
+%We first connected the slave interface of the register peripheral to the GP port master interface via AXI lite interconnect.
+%This scenario is similar to the one in which a processor communicates with general purpose I/O (GPIO). 
+%We did an experiment to find out the exact number of clock cycles to write 4 bytes of information to a register residing in PL. 
+%We set clock frequency to 100 MHz.
+%We repetitively write 4 byte of data to the same register address.     
+%When measuring using Chipscope, latency between two transactions is obtained as 15 clock cycles as shown in Fig. \ref{pio_chipscope}.
+%
+%
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=12cm]{figures/pio.png}
+%\caption{PIO Transactions.}
+%\label{pio_chipscope}
+%\end{figure} 
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%        xlabel=\textsc{Frequency of operation},
+%        ylabel=latency in $ns$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ]    
+%     \addplot plot coordinates {
+%        (100,	150)
+%        (150,   126)
+%        (200,   110)
+%        (250,   104)       
+%        
+%    };   
+%   
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{latency in $ns$}
+%\label{pio}
+%\end{figure}
+%
+%This experiment involved determining the latency in two consecutive write operations using PIO method. 
+%We did another experiment to see if it is possible to further reduce the latency below 150 ns by increasing the operating frequency. 
+%We found the results as shown in Fig. \ref{pio}. Latency got reduced from 150 ns to 104 ns, as we increased the frequency from 100 MHz to 250 MHz.
+%
+%We conducted another experiment to evaluate the bandwidth of GP port while both methods, PIO and PS-DMA based, were used for data transactions (sample size = 4 byte) between PL memory region and main memory. 
+%We set clock frequency to 100 MHz and connected the slave interface of the memory peripheral to the GP port master interface via AXI interconnect. 
+%A bare metal SW application was used for data transactions between 32 KB memory (implemented using 8 BRAMs) and the main memory. 
+%Results in Fig. \ref{piovsdma} shows that PIO method takes less time compared to PS-DMA method for data size less than 1 KB. 
+%Hence, PIO method provide a better option for transferring small chunk of data like overlay configuration (which is generally less than 1KB) to the PL. 
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Transaction time in $us$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ]    
+%     \addplot plot coordinates {
+%        (32,     5)
+%        (64,     10)
+%        (128,    20)
+%        (256,    40)
+%        (512,    80)
+%        
+%    };
+%    \addplot plot coordinates {
+%        (32,     18)
+%        (64,     20)
+%        (128,    23)
+%        (256,    31)
+%        (512,    46)
+%        
+%	};    
+%    \legend{PIO\\PS-DMA\\}	
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{Time in $us$ for data transactions}
+%\label{piovsdma}
+%\end{figure} 
+%
+%Table \ref{table_throughput} and Fig. \ref{psdma} shows maximum performance obtained using PS-DMA method as 80MB/s.
+%The transfer time between PS and MFIFO is the performance bottleneck. 
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for PS-DMA based transactions}
+%\label{table_throughput}
+%\scriptsize
+%\centering
+%\begin{tabular}{|c|c|c|}
+%\hline
+%{ No. of }  & {Time taken} 	& { Throughput} \\
+%{ Samples}  & {in $us$}    	& { in MB/s} \\
+%\hline		
+%{ 32}  		& { 18.4} 		& { 6.9 }  \\
+%\hline
+%{ 64}  		& { 20.0} 		& { 12.7 }  \\
+%\hline
+%{ 128} 		& { 23.5} 		& { 21.7 } \\
+%\hline
+%{ 256} 		& { 31.3} 		& { 32.6 } \\
+%\hline
+%{ 512} 		& { 46.7} 		& { 43.8 } \\
+%\hline
+%{ 1024} 	& { 76.6} 		& { 53.4 }  \\
+%\hline
+%{ 2048} 	& { 113.6} 		& { 72.1 }  \\
+%\hline
+%{ 4096} 	& { 210.6} 		& { 77.7 }  \\
+%\hline
+%{ 8192} 	& { 403.5} 		& { 81.2 }  \\
+%\hline
+%\end{tabular}
+%\end{table*}
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ] 
+%     \addplot plot coordinates {
+%        (32,     25)
+%        (64,     25)
+%        (128,    25)
+%        (256,    25)
+%        (512,    25)
+%        (1024,   25)
+%        (2048,   25)
+%        (4096,   25)
+%        (8192,   25)        
+%       
+%    };       
+%     \addplot plot coordinates {
+%        (32,     7)
+%        (64,     12.7)
+%        (128,    21.7)
+%        (256,    32.6)
+%        (512,    43.8)
+%        (1024,   53.4)
+%        (2048,   72.1)
+%        (4096,   77.7)
+%        (8192,   81.2)        
+%       
+%    };   
+%    \legend{PIO\\PS-DMA\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{Throughput comparison between PIO and PS-DMA method}
+%\label{psdma}
+%\end{figure}
+%
+%As we already mentioned that XPS provides an automated method to generate custom peripheral, containing slave or master interface, which can be either register peripheral or a memory peripheral. We have generated a custom memory peripheral using XPS and found that it does not make used of BRAM to implement memory. 
+%In order to make use of BRAM as a hard IP block available in Zynq device, we modified the RTL of the custom IP core and instantiated BRAM as hard IP block. Table \ref{table_res_usage} shows the resource usage of the vendor-generated and modified custom peripheral.
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Resource usage of memory peripheral}
+%\label{table_res_usage}
+%\scriptsize
+%\centering
+%\begin{tabular}{|c|c|c|}
+%\hline
+%{ Resource} & {No. of resources} 		& {No. of resources} \\
+%{ Type}  	& {in original peripheral}  & {in customized peripheral} \\
+%		  
+%
+%\hline		
+%{ LUT}  	& { 8726} 					& { 372 }  \\
+%\hline
+%{ FF}  		& { 16575} 					& { 179 }  \\
+%\hline
+%{ LUTRAM} 	& { 33} 					& { 33 } \\
+%\hline
+%{ BRAM} 	& { 0} 						& { 2 } \\
+%\hline
+%\end{tabular}
+%\end{table*}
+%
+%
+%\section{HP ports}
+%In previous section, we have seen that GP master ports can be used effectively for controlling SW accessible register peripheral and also for the applications requiring moderate communication bandwidth (less than 80 MB/s). 
+%High performance (HP) slave ports can be used for applications requiring high communication bandwidth (more than or equal to 80 MB/s) at the cost of some extra area overhead.
+%There are four HP interfaces, each including two FIFO buffers for read and write traffic. 
+%These interfaces are also referenced as AFI(AXI FIFO interface), to emphasize their buffering capabilities.
+%The PL to memory interconnect routes the HP ports to the DDR memory ports or the OCM.
+%In order to obtain maximum performance when using only two of the four HP ports, either the odd or the even numbered ports are used. 
+%
+%PS-DMA can not be used for data transfer through HP ports. Only a Soft-DMA implemented in the FPGA fabric can be used to transfer data through HP ports. 
+%Soft DMA uses an FPGA soft IP core to control the data movement between the memory and PL. 
+%Two variations are possible: memory mapped to memory mapped (MM-MM DMA) transactions and memory mapped to streaming (MM-S DMA) transactions. 
+%For soft DMA transfers the CPU is free during the transactions and can be interrupted by the DMA controller IP core at the end of data transfer.
+%We have used the AXI Central DMA (CDMA) Controller IP core from Xilinx as a soft DMA for MM-MM transactions between DDR and memory peripheral.
+%%CDMA is a hardware machine which gets initialized as a soft IP core in PL.
+%%As it is simple, compared to PS-DMA it is faster.
+%%Connection between PS and PL is through HP port. 
+%%The CDMA IP core present in PL is the master, it is connected via the HP slave port. 
+%%The CDMA slave is connected to GP port for configuration and status information. 
+%The DDR memory acts as the source and the memory in PL acts as destination.
+%This connectivity diagram is shown in Figure \ref{PL_DMA}.  
+%
+%Interrupt mode of data transfer is used which gets triggered either on completion of data transfer or occurrence of error.
+%Data transfer steps are as follows:
+%
+%First the source memory is filled with data and initial configuration settings for DMA and Interrupt controller are loaded. 
+%The CDMA register is loaded with source and destination address along with length of transfer. 
+%The transfer begins and when interrupt occurs the DMA transfer state is checked. 
+%CDMA controller uses a master interface to transfer data between two slave interfaces. 
+%In this experiment, this master interface is connected to the slave interface of the memory peripheral and also to one HP slave port.
+%The CDMA slave is connected to GP port for configuration and status information. 
+%The maximum burst length is 256, which means that with a burst size of 4 and 8 bytes, we can transfer 1K and 2K bytes, respectively in a single burst. Huge FIFOs are used to facilitate large data transfer without stalling the PL. PS is responsible for the clock management.
+%Xilinx also provides bare metal SW drivers to use with their CDMA IP core.
+%
+%%Ref Zynq TRM pg:630
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=10cm]{figures/PL_DMA.pdf}
+%\caption{PL DMA Connectivity Diagram.}
+%\label{PL_DMA}
+%\end{figure}
+%
+%\subsection{Single CDMA IP Core and Memory Peripheral}
+%\label{singlecdma}
+%Experiments are done to obtain throughput values for data transfer using \ac{CDMA} soft IP core in the PL. 
+%%Read/Write accesses using HP port directly interacts with the DDR memory instead of going through caches and hence cache coherency is an issue for applications requiring some kind of pre-processing and post-processing on the data.
+%In order to ensure cache coherency, SW application must manage caches which means explicit flushing and invalidation of caches needs to be performed. 
+%It takes many CPU cycles and affects application execution time as shown in Table \ref{table_cdma}.
+%%In the next section, we show the effect of cache coherency on application throughput.   
+%%As HP port is used, cache coherency needs to be imposed in the code. 
+%%The chipscope graph is given below-
+%
+%
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for CDMA based transactions}
+%\label{table_cdma}
+%\scriptsize 
+%%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%{ No. of }  & {src-flush} 	& {Transfer} 	& {dst-flush } 	& { Total} 		\\
+%{ Samples}  & {time in $us$}& {time in $us$}& {time in $us$}& {time in $us$}\\
+%\hline		                
+%{ 32}  		& { 1.3} 		& { 3.6 }  		& { 0.9 }  		& { 5.93 }  	\\
+%\hline                      
+%{ 64}  		& { 1.9} 		& { 4.2 }  		& { 1.5 }  		& { 7.81 }  	\\
+%\hline                      
+%{ 128} 		& { 3.3} 		& { 5.5 } 		& { 2.7 } 		& { 11.61 } 	\\
+%\hline                      
+%{ 256} 		& { 5.8} 		& { 8.1 } 		& { 5.0 } 		& { 19.01 } 	\\
+%\hline                      
+%{ 512} 		& { 11.4} 		& { 10.7 } 		& { 9.7 } 		& { 31.81 } 	\\
+%\hline                      
+%{ 1024} 	& { 21.8} 		& { 15.8 }  	& { 19.0 }  	& { 56.69 }  	\\
+%\hline                      
+%{ 2048} 	& { 43.6} 		& { 26.2 }  	& { 37.6 }  	& { 107.64 }  	\\
+%\hline                      
+%{ 4096} 	& { 84.4} 		& { 47 }  		& { 74.9 }  	& { 206.42 }  	\\
+%\hline                      
+%{ 8192} 	& { 169.7} 		& { 88.5 }  	& { 149.5 }  	& { 407.72 }  	\\
+%\hline
+%\end{tabular}
+%\end{table*} 
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%    	ymin=0,
+%    	ymax=1200,    
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ] 
+%     \addplot plot coordinates {
+%        (32,     21.59)
+%        (64,     32.78)
+%        (128,    44.10)
+%        (256,    53.87)
+%        (512,    64.38)
+%        (1024,   72.25)
+%        (2048,   76.11)
+%        (4096,   79.37)
+%        (8192,   80.37)        
+%       
+%    };        
+%     \addplot plot coordinates {
+%        (32,     25.70)
+%        (64,     40.83)
+%        (128,    57.46)
+%        (256,    73.20)
+%        (512,    92.67)
+%        (1024,   108.70)
+%        (2048,   117.10)
+%        (4096,   124.64)
+%        (8192,   126.90)        
+%       
+%    };    
+%
+%     \addplot plot coordinates {
+%        (32,     27.77)
+%        (64,     43.91)
+%        (128,    61.84)
+%        (256,    77.93)
+%        (512,    100.34)
+%        (1024,   117.46)
+%        (2048,   128.10)
+%        (4096,   134.33)
+%        (8192,   137.67)        
+%       
+%    }; 
+%     \addplot plot coordinates {
+%        (32,     34.41)
+%        (64,     57.66)
+%        (128,    91.10)
+%        (256,    125.64)
+%        (512,    190.51)
+%        (1024,   257.29)
+%        (2048,   311.01)
+%        (4096,   348.45)
+%        (8192,   370.05)        
+%       
+%    };   
+%    \legend{Both side\\Src side\\Dst side\\No-flushing\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{PL-DMA method}
+%\label{pldma}
+%\end{figure}
+%
+%%The Experimental results are shown in the table \ref{table_cdma}.
+%Maximum throughput obtained for data transfer is 80, 137, 126 and 370 MB/s for the cases of both side, source side, destination side and no flushing respectively. 
+%
+%%Fig. \ref{pldma} shows the throughput variation as data size changes for four different scenarios:
+%%\begin{itemize}\itemsep1pt \parskip0pt
+%%\item When pre-processing and post-processing is required on the data
+%%\item When only pre-processing is required.
+%%\item When only post-processing is required.
+%%\item Neither pre-processing nor post-processing is required.
+%%\end{itemize}
+%
+%%\begin{itemize}\itemsep1pt \parskip0pt
+%%\item When pre-processing and post-processing is required on the data
+%%\item flushing done at source side - The source is cache coherent but destination is not.
+%%\item flushing done at destination side - The destination is cache coherent but source is not.
+%%\item No flushing - If cache coherency is not required.
+%%\end{itemize}
+%
+%
+%\subsection{Increasing operating frequency to 150 MHz}
+%The operating frequency can be increased up to 150 MHz.  
+%The experiment presented in previous section is repeated for this increased frequency. 
+%Experimental results are shown below in the table \ref{table_cdma_150}.
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for CDMA based transactions at 150 MHz}
+%\label{table_cdma_150}
+%\scriptsize 
+%%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%{ No. of }  & {src-flush} 	& {Transfer} 	& {dst-flush } 	& { Total} 		\\
+%{ Samples}  & {time in $us$}& {time in $us$}& {time in $us$}& {time in $us$}\\
+%\hline		                
+%{ 32}  		& { 1.3} 		& { 3.2 }  		& { 0.9 }  		& { 5.5 }  	\\
+%\hline                      
+%{ 64}  		& { 1.9} 		& { 3.7 }  		& { 1.5 }  		& { 7.1 }  	\\
+%\hline                      
+%{ 128} 		& { 3.3} 		& { 4.7 } 		& { 2.7 } 		& { 10.6 } 	\\
+%\hline                      
+%{ 256} 		& { 5.8} 		& { 6.4 } 		& { 5.0 } 		& { 17.3 } 	\\
+%\hline                      
+%{ 512} 		& { 11.4} 		& { 8.2 } 		& { 9.7 } 		& { 29.3 } 	\\
+%\hline                      
+%{ 1024} 	& { 21.8} 		& { 11.7 }  	& { 19.0 }  	& { 52.6 }  	\\
+%\hline                      
+%{ 2048} 	& { 43.6} 		& { 19.0 }  	& { 37.6 }  	& { 99.5 }  	\\
+%\hline                      
+%{ 4096} 	& { 84.4} 		& { 33.3 }  	& { 74.9 }  	& { 193.6 }  	\\
+%\hline                      
+%{ 8192} 	& { 169.7} 		& { 62.0 }  	& { 149.5 }  	& { 380.0 }  	\\
+%\hline
+%\end{tabular}
+%\end{table*} 
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%    	ymin=0,
+%    	ymax=1200,
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ] 
+%      \addplot plot coordinates {
+%        (32,     18.82)
+%        (64,     26.10)
+%        (128,    32.34)
+%        (256,    59.09)
+%        (512,    69.85)
+%        (1024,   77.75)
+%        (2048,   82.27)
+%        (4096,   84.61)
+%        (8192,   86.24)        
+%       
+%    };        
+%     \addplot plot coordinates {
+%        (32,     24.33)
+%        (64,     36.11)
+%        (128,    47.58)
+%        (256,    83.18)
+%        (512,    104.44)
+%        (1024,   121.80)
+%        (2048,   132.41)
+%        (4096,   138.03)
+%        (8192,   142.19)        
+%       
+%    };    
+%
+%     \addplot plot coordinates {
+%        (32,     26.34)
+%        (64,     39.02)
+%        (128,    51.35)
+%        (256,    89.35)
+%        (512,    114.03)
+%        (1024,   132.90)
+%        (2048,   144.48)
+%        (4096,   151.27)
+%        (8192,   154.88)        
+%       
+%    }; 
+%     \addplot plot coordinates {
+%        (32,     38.55)
+%        (64,     66.67)
+%        (128,    104.49)
+%        (256,    159.01)
+%        (512,    248.24)
+%        (1024,   348.00)
+%        (2048,   431.16)
+%        (4096,   490.98)
+%        (8192,   528.18)        
+%       
+%    }; 
+%    \legend{Both side\\Src side\\Dst side\\No-flushing\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{PL-DMA method at 150 MHz}
+%\label{pldma_150}
+%\end{figure}
+%
+%It is clear from the Fig. \ref{pldma_150} that there is no benefit of increasing operating frequency in cases where any kind of flushing is required.
+%Maximum throughput obtained for data transfer is 86, 142, 154 and 528 MB/s for the case of both side, source side, destination side and no flushing respectively. 
+%
+%
+%
+%\subsection{Increasing channel width to 64 bit}
+%The HP port which is used in CDMA method supports up to 64 bit data transfer. The experiment is repeated with increase in size.
+%The Experimental results are shown below in the table \ref{table_cdma_64}.
+%%Please not that each sample size is double in this case compared to previously used.
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for CDMA based transactions for 64-bit data channel}
+%\label{table_cdma_64}
+%\scriptsize 
+%%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%{ No. of }  & {src-flush} 	& {Transfer} 	& {dst-flush } 	& { Total} 		\\
+%{ Samples}  & {time in $us$}& {time in $us$}& {time in $us$}& {time in $us$}\\
+%\hline		                
+%{ 32}  		& { 1.9} 		& { 4.2 }  		& { 1.5 }  		& { 7.6 }  	\\
+%\hline                      
+%{ 64}  		& { 3.2} 		& { 4.8 }  		& { 2.7 }  		& { 10.8 }  	\\
+%\hline                      
+%{ 128} 		& { 5.8} 		& { 6.1 } 		& { 5.0 } 		& { 17.0 } 	\\
+%\hline                      
+%{ 256} 		& { 11.1} 		& { 8.7 } 		& { 9.7 } 		& { 29.5 } 	\\
+%\hline                      
+%{ 512} 		& { 21.5} 		& { 11.4 } 		& { 19.0 } 		& { 52.0 } 	\\
+%\hline                      
+%{ 1024} 	& { 42.5} 		& { 16.4 }  	& { 37.6 }  	& { 96.5 }  	\\
+%\hline                      
+%{ 2048} 	& { 84.4} 		& { 26.6 }  	& { 74.9 }  	& { 185.9 }  	\\
+%\hline                      
+%{ 4096} 	& { 168.2} 		& { 47.1}  		& { 149.5}  	& { 364.8 }  	\\
+%\hline                      
+%{ 8192} 	& { 335.8} 		& { 88.1 }  	& { 298.6 }  	& { 722.6 }  	\\
+%\hline
+%\end{tabular}
+%\end{table*} 
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%    	ymin=0,
+%    	ymax=1200,
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ] 
+%      \addplot plot coordinates {
+%        (32,     33.33)
+%        (64,     47.23)
+%        (128,    60.09)
+%        (256,    69.38)
+%        (512,    78.72)
+%        (1024,   84.81)
+%        (2048,   88.09)
+%        (4096,   89.81)
+%        (8192,   90.69)        
+%       
+%    };        
+%     \addplot plot coordinates {
+%        (32,     41.56)
+%        (64,     63.29)
+%        (128,    85.33)
+%        (256,    103.43)
+%        (512,    124.08)
+%        (1024,   139.01)
+%        (2048,   147.52)
+%        (4096,   152.18)
+%        (8192,   154.59)        
+%       
+%    };    
+%
+%     \addplot plot coordinates {
+%        (32,     44.60)
+%        (64,     67.55)
+%        (128,    91.59)
+%        (256,    111.18)
+%        (512,    134.52)
+%        (1024,   151.51)
+%        (2048,   161.31)
+%        (4096,   166.63)
+%        (8192,   169.44)        
+%       
+%    }; 
+%     \addplot plot coordinates {
+%        (32,     60.66)
+%        (64,     106.00)
+%        (128,    166.78)
+%        (256,    235.40)
+%        (512,    358.36)
+%        (1024,   499.21)
+%        (2048,   615.02)
+%        (4096,   695.42)
+%        (8192,   743.71)        
+%       
+%    }; 
+%    \legend{Both side\\Src side\\Dst side\\No-flushing\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{PL-DMA method at 64-bit}
+%\label{pldma_64}
+%\end{figure}
+%
+%It is clear from the Fig. \ref{pldma_64} that there is no benefit of increasing channel width, when flushing is required.
+%Maximum throughput obtained for data transfer is 90, 154, 169 and 743 MB/s for the cases of both side, source side, destination side and no flushing respectively. 
+%
+%
+%\subsection{Final design for maximum bandwidth}
+%The experiment is repeated with 64 bit data channel width as well as 150 MHz clock frequency.
+%The Experimental results are shown below in the table \ref{table_cdma_64_150}.
+%%Please not that each sample size is double in this case compared to previously used.
+%
+%\begin{table*}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for CDMA with 64-bit data channel at 150 MHz}
+%\label{table_cdma_64_150}
+%\scriptsize 
+%%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%{ No. of }  & {src-flush} 	& {Transfer} 	& {dst-flush } 	& { Total} 		\\
+%{ Samples}  & {time in $us$}& {time in $us$}& {time in $us$}& {time in $us$}\\
+%\hline		                
+%{ 32}  		& { 1.9} 		& { 3.32 }  	& { 1.5 }  		& { 6.8 }  	\\
+%\hline                      
+%{ 64}  		& { 3.2} 		& { 3.84 }  	& { 2.7 }  		& { 9.8 }  	\\
+%\hline                      
+%{ 128} 		& { 5.8} 		& { 4.9 } 		& { 5.0 } 		& { 15.8 } 	\\
+%\hline                      
+%{ 256} 		& { 11.1} 		& { 6.53 } 		& { 9.7 } 		& { 27.3 } 	\\
+%\hline                      
+%{ 512} 		& { 21.5} 		& { 8.25 } 		& { 19.0 } 		& { 48.8 } 	\\
+%\hline                      
+%{ 1024} 	& { 42.5} 		& { 11.87 }  	& { 37.6 }  	& { 92.0 }  	\\
+%\hline                      
+%{ 2048} 	& { 84.4} 		& { 19.06 }  	& { 74.9 }  	& { 178.4 }  	\\
+%\hline                      
+%{ 4096} 	& { 168.2} 		& { 33.4}  		& { 149.5}  	& { 351.1 }  	\\
+%\hline                      
+%{ 8192} 	& { 335.8} 		& { 62.3 }  	& { 298.6 }  	& { 696.8 }  	\\
+%\hline
+%\end{tabular}
+%\end{table*} 
+%
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%    	ymin=0,
+%    	ymax=1200,
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos=outer north east,
+%        legend style={draw=none}
+%    ] 
+%      \addplot plot coordinates {
+%        (32,     37.65)
+%        (64,     52.19)
+%        (128,    64.69)
+%        (256,    74.96)
+%        (512,    83.87)
+%        (1024,   89.01)
+%        (2048,   91.80)
+%        (4096,   93.32)
+%        (8192,   94.05)        
+%       
+%    };        
+%     \addplot plot coordinates {
+%        (32,     48.67)
+%        (64,     72.21)
+%        (128,    95.17)
+%        (256,    116.17)
+%        (512,    137.31)
+%        (1024,   150.62)
+%        (2048,   158.33)
+%        (4096,   162.52)
+%        (8192,   164.60)        
+%       
+%    };    
+%
+%     \addplot plot coordinates {
+%        (32,     52.67)
+%        (64,     78.05)
+%        (128,    102.71)
+%        (256,    126.26)
+%        (512,    150.26)
+%        (1024,   165.46)
+%        (2048,   174.19)
+%        (4096,   179.16)
+%        (8192,   181.55)        
+%       
+%    }; 
+%     \addplot plot coordinates {
+%        (32,     77.11)
+%        (64,     133.33)
+%        (128,    208.98)
+%        (256,    313.63)
+%        (512,    496.48)
+%        (1024,   690.14)
+%        (2048,   859.60)
+%        (4096,   981.08)
+%        (8192,   1051.94)        
+%       
+%    }; 
+%    \legend{Both side\\Src side\\Dst side\\No-flushing\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{PL-DMA method at 64-bit and 150 MHz}
+%\label{pldma_150_64}
+%\end{figure}
+%
+%It is clear from the Fig. \ref{pldma_150_64} that there is no benefit of increasing both data width and operating frequency in cases where any kind of flushing is required.
+%Maximum throughput obtained for data transfer is 94, 164, 181 and 1051 MB/s for the case of both side, source side, destination side and no flushing respectively. 
+%
+%
+%\section{ACP Port}
+%One high performance 64 bits wide low-latency cache-coherent slave port. The port can access both L2 cache and on-chip memory. 
+%ACP port is connected to the Snoop control unit due to which caches do not need to be flushed and invalidated. 
+%SCU is responsible for cache coherency and management between L1 and L2 caches. 
+%Duplicated 4-way associative tag RAMs act as a local directory. 
+%It also manages arbitration, communication, cache and system memory transfers for the processor and ACP.
+%During coherent write request the L1 cache is checked for address, if present, data is invalidated. The cache miss or invalidated cache then results in request to L2 cache or main memory. Therefore it requires no explicit cache invalidation unlike HP port. During coherent read, L1 cache is checked if there is a cache miss the L2 and main memory are checked hierarchically. Hence it has fast write but slow read when compared to HP port.
+%
+%\begin{table}[!h]
+%\renewcommand{\arraystretch}{1.3}
+%\caption{Experiment results for CDMA based transactions through ACP}
+%\label{table_throughput_acp}
+%\footnotesize
+%\centering
+%\begin{tabular}{|c|c|c|c|c|}
+%\hline
+%{ No. of }  & \multicolumn{2}{|c|}{Time taken in $us$} 	& \multicolumn{2}{|c|}{Throughput in MB/s}  \\ \cline{2-5}
+%{ Samples}  & {100 MHz}		& {150 MHz} 				& {100 MHz}		& {150 MHz} 	 			\\
+%\hline		
+%{ 32}  		& { 2.3} 		& { 2.3} 					& { 111.3 }    	& { 111.3 }					\\
+%\hline                      	                                        				
+%{ 64}  		& { 2.97} 		& { 2.66} 					& { 172.39 }    & { 192.48 }				\\
+%\hline                      	                                        				
+%{ 128} 		& { 4.19} 		& { 3.45} 					& { 244.39 }    & { 296.81 }				\\
+%\hline                      	                                        				
+%{ 256} 		& { 6.73} 		& { 4.78} 					& { 304.30 }    & { 428.45 }				\\
+%\hline                      	                                        				
+%{ 512} 		& { 9.46} 		& { 7.44} 					& { 432.98 }    & { 550.54 }				\\
+%\hline                      	                                        				
+%{ 1024} 	& { 14.58} 		& { 10.93}					& { 561.86 }    & { 749.50 }				\\
+%\hline                      	                                        				
+%{ 2048} 	& { 25.13} 		& { 18.39}					& { 651.96 }    & { 890.92 }				\\
+%\hline                      	                                        				
+%{ 4096} 	& { 46.6} 		& { 32.82} 					& { 703.17 }    & { 998.42 }				\\
+%\hline                      	                                        				
+%{ 8192} 	& { 88.33} 		& { 62.21}					& { 741.94 }    & { 1053.46}				\\
+%\hline
+%\end{tabular}
+%\end{table}
+%
+%CDMA experiment is conducted using the ACP port. As ACP is connected to the Snoop control unit, no explicit flushing is required. Therefore the throughput obtained is equal to transfer time without flushing of 64 bit HP port. 
+%
+%
+%\begin{figure}[!h]
+%\centering
+%\begin{tikzpicture}
+%    \begin{axis}[
+%        ymin=0,
+%        ymax=1200,
+%        xlabel=\textsc{Number of Samples},
+%        ylabel=Throughput in $MB/s$,
+%        legend pos= north west,
+%        legend style={draw=none}
+%    ] 
+%     \addplot plot coordinates {
+%        (32,     111.3)
+%        (64,     172.39)
+%        (128,    244.39)
+%        (256,    304.30)
+%        (512,    432.98)
+%        (1024,   561.86)
+%        (2048,   651.96)
+%        (4096,   703.17)
+%        (8192,   741.94)        
+%       
+%    };    
+%   
+%      \addplot plot coordinates {
+%         (32,     111.3)
+%         (64,     192.48)
+%         (128,    296.81)
+%         (256,    428.45)
+%         (512,    550.54)
+%         (1024,   749.50)
+%         (2048,   890.92)
+%         (4096,   998.42)
+%         (8192,   1053.46)        
+%        
+%     };    
+%    \legend{100 MHz\\150 MHz\\}
+%    \end{axis}
+%\end{tikzpicture}
+%\caption{Throughput for CDMA transactions through ACP}
+%\label{pldma_acp}
+%\end{figure}
+%
+%
+%\section{Summary}
+%Following is the summary of this chapter:
+%
+%\begin{itemize}\itemsep1pt \parskip0pt
+%\item Achievable bandwidth of GP Port using PIO method is 25 MB/s (200Mb/s) which is suitable for small size data transactions (less than 1KB) and for controlling user registers.
+%\item Achievable bandwidth of GP port using PS-DMA method is approximately 80 MB/s (640 Mb/s) which is suitable for moderate bandwidth requirement (up to 80 MB/s). 
+%\item PIO and PS-DMA based methods don't require any FPGA hardware resources for data movement and hence consume less power.
+%\item High performance (HP) ports can be used for applications requiring high bandwidth (more than 80 MB/s) at the cost of some area overhead (consumed by DMA controller).
+%\item Theoretical bandwidth of HP port is 1200 MB/s (9.6 Gb/s) when using 64-bit channel and 150 MHz frequency. 
+%	  We achieved a bandwidth of 1050 MB/s (8.4 Gb/s) considering that pre-processing and post-processing of data is not required (which means cache coherency is not required).
+%\item Cache coherency is an issue while using HP ports and SW application must have to manage caches by doing explicit flushing and invalidation.
+%\item If cache coherency is required in the application, then we can only achieve a throughput of 95, 165, 180 MB/s for the cases of both side, source side and destination side flushing respectively. 	  
+%\item Upto four DMA controllers can be connected to HP ports and can provide a cumulative bandwidth of four times the above mentioned values. It means we can achieve maximum bandwidth of 4200 MB/s (33.6 Gb/s) using all HP ports simultaneously.
+%\item HW support for cache flushing and invalidation have been provided in Zynq device in form of snoop control unit (SCP) and ACP port is directly connected to SCU due to which it provides best performance (1050 MB/s) even in the case when pre-processing and post-processing of data is required.
+%\end{itemize}
+%
+%
+%%\subsection{Four parallel CDMA controllers}
+%%As HP port is used, the throughput is better than PS-DMA which uses the GP port. As there are four HP ports, up to 4 CDMA cores can be used in parallel to obtain high performance.
+%%
+%%The interface used in CDMA is the HP port. As there are four HP ports, they can be used in parallel to obtain higher bandwidth. In PL four CDMA soft cores are initialized which are connected to the HP ports. Data is transferred from the DDR to the corresponding memory in PL in parallel.
+%%
+%%
+%%The latency and throughput values obtained for four channel CDMA transfer process in non-coherent mode are given below-
+%%
+%%Throughput obtained for data transfer without taking into account the source and destination flush times for 4 channel CDMA data transfer are plotted. The throughput values obtained for 4 channel is similar to the single channel case i.e. 370 MBps. If cache coherency is not required, this value can be utilized.
+%
+%
+%
