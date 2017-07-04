@@ -40,8 +40,7 @@ For improved performance and efficiency, the code can be rewritten in such a way
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/c2.png}
-	\caption{Overlapping Computation with Communication using Double Buffering                   
-	}
+	\caption{Overlapping Computation with Communication}
 	\label{c2:mat}
 \end{figure}
 
@@ -49,7 +48,7 @@ Consider the code in figure~\ref{c2:mat} which shows the overlapping of the comm
 The same concept is used in measuring the performance for huge set of input data samples in chapter 5.
 
 
-\section{Overall Software Processing}
+\section{Programming Model}
 A basic program for MXP can be written by following the procedure below:
 
 \begin{enumerate}
@@ -77,9 +76,9 @@ A basic program for MXP can be written by following the procedure below:
 
 A sample example to explain the methodology is shown in Figure~\ref{c3:mat} The details of the programming methodology used can be found at \cite{20}. The figure shows a sample MXP program with the overall software process followed by MXP. The program shown in Figure~\ref{c3:mat} works fine in a bare-metal system. 
 
-\subsection{What if we want to run any image and audio processing application?}
+%\subsection{What if we want to run any image and audio processing application?}
 
-In this case, we will need a filesystem through which information in form of bytes from the input file can be extracted without having to manually enter values as in the example above. Also, the results after processing needs to be written to a file in the appropriate file format depending on the input file type. Vectorblox do provide sources for Linux containing necessary device drivers along with prebuilt bitstreams and hardware design file generated through Vivado.
+In the case when we want to run any image and audio processing application, we will need a filesystem through which information in form of bytes from the input file can be extracted without having to manually enter values as in the example above. Also, the results after processing needs to be written to a file in the appropriate file format depending on the input file type. Vectorblox do provide sources for Linux containing necessary device drivers along with prebuilt bitstreams and hardware design file generated through Vivado.
 
 We provide detailed steps for setting up Linux OS to use MXP on the ZedBoard so that it becomes easy for others to develop application and make full use of the system. Chapter 4 consist of the detailed information on how the Linux can be set up to use MXP.
 

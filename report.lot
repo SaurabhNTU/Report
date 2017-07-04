@@ -9,12 +9,12 @@
 \contentsline {table}{\numberline {5.3}{\ignorespaces Kernel Benchmarks\relax }}{32}{table.caption.22}
 \contentsline {table}{\numberline {5.4}{\ignorespaces Poly-2 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.23}
 \contentsline {table}{\numberline {5.5}{\ignorespaces Poly-3 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.24}
-\contentsline {table}{\numberline {5.6}{\ignorespaces Throughput(Gops/sec) Analysis for Poly Benchmarks\relax }}{36}{table.caption.27}
+\contentsline {table}{\numberline {5.6}{\ignorespaces Throughput(Gops/sec) Analysis for Poly Benchmarks\relax }}{34}{table.caption.27}
 \contentsline {table}{\numberline {5.7}{\ignorespaces Throughput(Gops/sec) Analysis for Filter Benchmarks\relax }}{38}{table.caption.31}
-\contentsline {table}{\numberline {5.8}{\ignorespaces Throughput(Gops/sec) Analysis for Standard Compute Kernels\relax }}{39}{table.caption.35}
-\contentsline {table}{\numberline {5.9}{\ignorespaces Throughput(Gops/sec) Analysis for Linear Algebra kernel\relax }}{39}{table.caption.39}
+\contentsline {table}{\numberline {5.8}{\ignorespaces Throughput(Gops/sec) Analysis for Standard Compute Kernels\relax }}{43}{table.caption.35}
+\contentsline {table}{\numberline {5.9}{\ignorespaces Throughput(Gops/sec) Analysis for Linear Algebra kernel\relax }}{44}{table.caption.39}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Image Processing Runtime Analysis\relax }}{48}{table.caption.45}
-\contentsline {table}{\numberline {6.2}{\ignorespaces SpMV Usage\relax }}{52}{table.caption.49}
-\contentsline {table}{\numberline {6.3}{\ignorespaces Runtime for SpMV kernel Computation\relax }}{53}{table.caption.50}
+\contentsline {table}{\numberline {6.1}{\ignorespaces Image Processing Runtime Analysis\relax }}{47}{table.caption.45}
+\contentsline {table}{\numberline {6.2}{\ignorespaces SpMV Usage\relax }}{51}{table.caption.49}
+\contentsline {table}{\numberline {6.3}{\ignorespaces Runtime for SpMV kernel Computation\relax }}{52}{table.caption.50}
 \addvspace {10\p@ }
