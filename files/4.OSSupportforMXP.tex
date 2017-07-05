@@ -96,14 +96,16 @@ We renamed u-boot to u-boot.elf and while building Linux kernel we need mkimage 
 	
 			\lstinputlisting[firstline=48, lastline=55, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 			
-			\begin{figure}
-				\centering
-				\includegraphics[width=1\textwidth]{images/c4.png}
-				\caption{DTS Entry for MXP}
-				\label{dts:blk}
-			\end{figure}
+%			\begin{figure}
+%				\centering
+%				\includegraphics[width=1\textwidth]{images/c4.png}
+%				\caption{DTS Entry for MXP}
+%				\label{dts:blk}
+%			\end{figure}
+
+  \lstinputlisting[language=c,firstline=133, lastline=164, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 			
-			After this, we see some dts\/dtsi files created inside mxp\_dts folder. We already have the device tree entries corresponding to various peripherals in mxp\_linux.dts file created in step 1. Hence, we are only interested in pl.dtsi files which will contain the device tree node for the MXP soft processor instantiated on programmable logic. Contents in pl.dtsi is as shown in Figure~\ref{dts:blk}.
+			After this, we see some dts\/dtsi files created inside mxp\_dts folder. We already have the device tree entries corresponding to various peripherals in mxp\_linux.dts file created in step 1. Hence, we are only interested in pl.dtsi files which will contain the device tree node for the MXP soft processor instantiated on programmable logic. Contents in pl.dtsi is as shown in the above DTS entry for MXP code snippet. 
 		
 		Given the way in which the device driver file mxp.c parses this device tree
 		node, we need to change contents of this file for the correct setup Specifically we need to change compatible string to
@@ -135,7 +137,7 @@ Save the file and generate boot.bin using the command below:
 
 Copy files boot.bin, devicetree.dtb and uImage into the FAT partition of sdcard. Plug-in the sdcard and boot ZedBoard. While the kernel is getting loaded we should some message like this
 
-\lstinputlisting[firstline=76, lastline=81, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
+\lstinputlisting[firstline=76, lastline=81, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 
 This means mxp driver is successfully loaded.
 
@@ -160,5 +162,5 @@ We successfully loaded the MXP drivers. The configuration parameters for the MXP
 
 The configuration details can be found in the below link:
 
-Github Link : \url{https://github.com/AdhikariSaurabh/mxpbenchmarks}
+Github Link : \url{https://github.com/AdhikariSaurabh/mxpbenchmarks/blob/master/mxplinuxsetup.doc}
 

@@ -13,17 +13,21 @@
 	minor tick num=4,
 }
 
+
 \begin{figure*}[!t]
 \centering
 \pgfplotstableread{
-	0  0.33		0.93	1.5		2.85   
-	1  0.4      1.8     2.28	4.74
-	2  0.28     0.5     0.75	1.9 
-	3  0.35    	0.9     1.14    3.43
-	4  0.16    	0.25    0.38    1.77
-	5  0.28    	0.43    0.57    2.35
+	0  0.23		0.55	1.41	2.32   
+	1  0.37     0.47    1.54	3.33
+	2  0.56     2.34    1.76	5.93 
+	3  0.11    	0.58    0.69    3.80
+	4  0.09    	0.68    0.91    6.96
+	5  0.07    	0.44    0.62    3.49
+	6  0.06		0.32	0.55	3.05
+	7  0.065	0.11	0.58	2.35
+	8  0.064	0.27	0.38	1.40		
 }\dataset
-\begin{tikzpicture}
+\begin{tikzpicture}[scale=0.95]
 \centering
 \begin{axis}[ybar=0pt,
 %enlarge x limits=0.05,
@@ -39,12 +43,16 @@ nodes near coords,
 xtick=data,
 bar width = 0.15,
 xticklabels = {
-	\strut quad-byte,
-	\strut cubic-byte,
-	\strut quad-half,
-	\strut cubic-half,
-	\strut quad-word,
-	\strut cubic-word,	                                  
+	\strut chebyshev-byte,
+	\strut mibench-byte,
+	\strut qspline-byte,
+	\strut fft-byte,
+	\strut kmeans-byte,
+	\strut mm-byte,
+	\strut spmv-byte,
+	\strut stencil-byte,
+	\strut
+	mri-byte,                               
 },
 x tick label style={rotate=45, anchor=north east, inner sep=0mm},
 major x tick style = {opacity=0},
@@ -65,7 +73,7 @@ every node near coord/.append style={
 			\ref{ARM} ARM \ref{NEON} NEON \ref{MXP} MXP \ref{Intel-i3} Intel-i3}};
 
 \end{tikzpicture}
-\caption{The performance comparisons of different architectures for quad and cubic}
-\label{throughput_quad_cubic}
+\caption{Byte Level performance comparisons of different architectures for kernels}
+\label{throughput_kernel_byte}
 
 \end{figure*}

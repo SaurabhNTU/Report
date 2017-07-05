@@ -94,30 +94,78 @@ dma data width in bytes = 8
  int img_size = 0;
  unsigned char *v_sub = NULL;
  unsigned char max_val = 255;
+ 
  // MXP initialization
  VectorBlox_MXP_Initialize("mxp0","cma"); 
+ 
  //Reading input image
  readPGM(&ipgm,"input_lena.pgm");  
  img_size = (ipgm.width * ipgm.height);
-  //Allocate buffer for output image
+ 
+ //Allocate buffer for output image
  opgm.width = ipgm.width; 
  opgm.height = ipgm.height;
- opgm.buf = (unsigned char*)vbx_shared_malloc(img_size * sizeof(unsigned char));
-  //Allocate vector on scratchpad
- v_sub = (unsigned char *)vbx_sp_malloc(img_size * sizeof(unsigned char )); 
+ int size=img_size * sizeof(unsigned char);
+ opgm.buf = (unsigned char*)vbx_shared_malloc(size);
+ 
+ //Allocate vector on scratchpad
+ v_sub = (unsigned char *)vbx_sp_malloc(size); 
+
  //Transfer input bytes from memory to scratchpad
  vbx_dma_to_vector(v_sub, ipgm.buf, img_size);
  vbx_set_vl(img_size);
+
  //Scalar vector subtraction for taking negative of image
  vbx(SVBU, VSUB, v_sub, max_val, v_sub);
+
  //Writing result from scratchpad to memory
  vbx_dma_to_host(opgm.buf, v_sub, img_size);
  vbx_sync();
+
  //Writing output image
  writePGM(&opgm,"out_lena_negative.pgm");
+ 
  //Free allocated pointers
- vbx_sp_free();
+  vbx_sp_free();
  vbx_shared_free(ipgm.buf);
  vbx_shared_free(opgm.buf);
  }
  
+ // DTS entry for MXP
+ amba_pl: amba_pl {
+ #address-cells = <1>;
+ #size-cells = <1>;
+ compatible = "simple-bus";
+ ranges ;
+ vectorblox_mxp_arm_0: vectorblox_mxp@b0000000 {
+ compatible = "xlnx,vectorblox-mxp-1.0";
+ reg = <0Xb0000000 0X10000 0X40000000 0X100000>;
+ vblx, = <1>;
+ vblx,archical = <0>;
+ vblx,beats_per_burst = <16>;
+ vblx,burstlength_bytes = <128>;
+ vblx,c_instr_port_type = <2>;
+ vblx,c_m_axi_addr_width = <32>;
+ vblx,c_m_axi_data_width = <64>;
+ vblx,c_m_axi_len_width = <4>;
+ vblx,c_m_axi_support_threads = <0>;
+ vblx,c_s_axi_addr_width = <32>;
+ vblx,c_s_axi_baseaddr = <0XB0000000>;
+ vblx,c_s_axi_data_width = <32>;
+ vblx,c_s_axi_highaddr = <0XB000FFFF>;
+ vblx,c_s_axi_instr_addr_width = <32>;
+ vblx,c_s_axi_instr_baseaddr = <0X40000000>;
+ vblx,c_s_axi_instr_data_width = <32>;
+ vblx,c_s_axi_instr_id_width = <6>;
+ ...................................
+ ...................................
+ ...................................
+ vblx,vector_lanes = <16>;
+ };
+ };
+ 
+ // simple for loop
+ for(int i=0;i<N;i++) {
+    // computing ax^2 + bx + c
+    y[i] = a* (x[i])*(x[i]) + b*x[i] + c;
+ }

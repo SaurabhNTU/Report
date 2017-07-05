@@ -13,15 +13,19 @@
 	minor tick num=4,
 }
 
+
 \begin{figure*}[!t]
 \centering
 \pgfplotstableread{
-	0  0.33		0.93	1.5		2.85   
-	1  0.4      1.8     2.28	4.74
-	2  0.28     0.5     0.75	1.9 
-	3  0.35    	0.9     1.14    3.43
-	4  0.16    	0.25    0.38    1.77
-	5  0.28    	0.43    0.57    2.35
+	0  0.19		0.51	0.70	2.18   
+	1  0.35     0.78    0.77	3.73
+	2  0.49     1.17    0.88	3.3 
+	3  0.09    	0.28    0.34    2.01
+	4  0.065    0.26    0.46    5.3
+	5  0.038    0.16    0.31    3.45
+	6  0.031	0.15	0.27	2.7
+	7  0.053	0.12	0.29	2.57
+	8  0.054	0.18	0.19	2.36		
 }\dataset
 \begin{tikzpicture}
 \centering
@@ -31,7 +35,7 @@ width=25cm,
 x = 1.8cm,
 height=8cm,
 ymin=0,
-ymax=8,        
+ymax=6,        
 ylabel={Throughput in $Gops$},
 grid style={dotted,gray},
 ymajorgrids=true,
@@ -39,12 +43,16 @@ nodes near coords,
 xtick=data,
 bar width = 0.15,
 xticklabels = {
-	\strut quad-byte,
-	\strut cubic-byte,
-	\strut quad-half,
-	\strut cubic-half,
-	\strut quad-word,
-	\strut cubic-word,	                                  
+	\strut chebyshev-half,
+	\strut mibench-half,
+	\strut qspline-half,
+	\strut fft-half,
+	\strut kmeans-half,
+	\strut mm-half,
+	\strut spmv-half,
+	\strut stencil-half,
+	\strut
+	mri-half,                               
 },
 x tick label style={rotate=45, anchor=north east, inner sep=0mm},
 major x tick style = {opacity=0},
@@ -65,7 +73,7 @@ every node near coord/.append style={
 			\ref{ARM} ARM \ref{NEON} NEON \ref{MXP} MXP \ref{Intel-i3} Intel-i3}};
 
 \end{tikzpicture}
-\caption{The performance comparisons of different architectures for quad and cubic}
-\label{throughput_quad_cubic}
+\caption{Halfword performance comparisons of different architectures for kernels}
+\label{throughput_kernel_half}
 
 \end{figure*}

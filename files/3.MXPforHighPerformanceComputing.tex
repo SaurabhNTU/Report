@@ -2,12 +2,12 @@
 \chapter{MXP for High Performance Computing}
 
 \section{VectorBlox MXP Matrix Processor}
-VectorBlox MXP is a scalable supercomputer on FPGA. It is a SIMD accelerator, available as an IP core. MXP consist of the scratchpad memory which is its local memory and all vector operations are performed directly upon it which maximizes its performance. Unlike traditional processors which have address and data registers, there are no load-stores of vector data in MXP \cite{20}. The architecture of MXP is composed of DMA engine and vector engine. MXP soft-processor provides maximum improved performance because the DMA and vector engine can run at a frequency which is different from the host CPU frequency. DMA engine is used to transfer the data to the local scratchpad. Since MXP implements DMA to access the DDR memory directly, the cache-hierarchy is bypassed. Vector engine is composed of multiple parallel vector lanes, the number of which can be configured from 1 to 256 and 4KB of scratchpad is available for each vector lane. Each lane consists of 32-bit ALU and 4KB of scratchpad memory. The scratchpad and ALU can be divided to perform operations on 16-bits/halfword or 8-bits/byte of data. Thus, the architecture of the MXP soft processor during the byte (8-bits) and half-word (16-bits) level operation provides four and two times the performance respectively as compared to the performance obtained for word level operation. 
+VectorBlox MXP is a scalable supercomputer on FPGA. It is a SIMD accelerator, available as an IP core. MXP consist of the scratchpad memory which is its local memory and all vector operations are performed directly upon it which maximizes its performance. Unlike traditional processors which have address and data registers, there are no load-stores of vector data in MXP \cite{19}. The architecture of MXP is composed of DMA engine and vector engine. MXP soft-processor provides maximum improved performance because the DMA and vector engine can run at a frequency which is different from the host CPU frequency. DMA engine is used to transfer the data to the local scratchpad. Since MXP implements DMA to access the DDR memory directly, the cache-hierarchy is bypassed. Vector engine is composed of multiple parallel vector lanes, the number of which can be configured from 1 to 256 and 4KB of scratchpad is available for each vector lane. Each lane consists of 32-bit ALU and 4KB of scratchpad memory. The scratchpad and ALU can be divided to perform operations on 16-bits/halfword or 8-bits/byte of data. Thus, the architecture of the MXP soft processor during the byte (8-bits) and half-word (16-bits) level operation provides four and two times the performance respectively as compared to the performance obtained for word level operation. 
 
 \begin{figure}
 	\centering
 	\includegraphics[width=0.9\textwidth]{images/mxp_diagram.pdf}
-	\caption{Matrix Processor on ZedBoard\cite{20}}
+	\caption{Matrix Processor on ZedBoard\cite{19}}
 	\label{zynq:mat}
 \end{figure}
 
@@ -74,7 +74,7 @@ A basic program for MXP can be written by following the procedure below:
 
 
 
-A sample example to explain the methodology is shown in Figure~\ref{c3:mat} The details of the programming methodology used can be found at \cite{20}. The figure shows a sample MXP program with the overall software process followed by MXP. The program shown in Figure~\ref{c3:mat} works fine in a bare-metal system. 
+A sample example to explain the methodology is shown in Figure~\ref{c3:mat} The details of the programming methodology used can be found at \cite{19}. The figure shows a sample MXP program with the overall software process followed by MXP. The program shown in Figure~\ref{c3:mat} works fine in a bare-metal system. 
 
 %\subsection{What if we want to run any image and audio processing application?}
 

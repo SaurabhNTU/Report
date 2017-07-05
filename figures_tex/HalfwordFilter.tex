@@ -1,47 +1,47 @@
-
-\begin{figure}
-	\centering
-	\begin{tikzpicture}
-	\begin{axis}[
-	width  = 0.85*\textwidth,
-	height = 8cm,
-	major x tick style = transparent,
-	bar width=10pt,
-	ymajorgrids = true,
-	ylabel = {Throughput in $Gops/sec$},
-	xlabel = {Filter Benchmarks},
-	symbolic x coords={Chebyshev,Mibench,Qspline},
-	xtick = data,
-	nodes near coords,
-	ybar,
-	every node near coord/.append style={rotate=90, anchor=west,font=\scriptsize, xshift=0.25cm},
-	scaled y ticks = false,
-	enlarge y limits={upper,value=0.2},
-	enlarge x limits=0.25,
-	ybar=2*\pgflinewidth,
-	legend cell align=left,
-	legend style={
-	at={(.5,-0.2)},
-	anchor=north,
-	legend columns=-1
-	column sep=0.5ex
-}
-	]
-	\addplot[draw=black,fill=blue,every node near coord/.append style={xshift=.3cm}]
-	coordinates {(Chebyshev, 0.708) (Mibench,0.77) (Qspline,0.88)};
-	
-	\addplot[draw=black,fill=orange]
-	coordinates {(Chebyshev, 2.186) (Mibench,6.738) (Qspline,13.38)};
-	
-	\addplot[draw=black,fill=yellow,every node near coord/.append style={xshift=-0.5cm}]
-	coordinates {(Chebyshev, 0.1955) (Mibench,0.352) (Qspline,0.493)};
-	
-	\addplot[draw=black,fill=red,every node near coord/.append style={xshift=-0.85cm}]
-	coordinates {(Chebyshev, 0.5159) (Mibench,0.7831) (Qspline,1.169)};
-	
-	\legend{MXP,Intel i3,ARM v7,NEON}
-	\end{axis}
-	\end{tikzpicture}
-	\caption{Halfword(16-bits) level throughput(Gops/sec) for filter benchmarks }
-	\label{filter:2}
-\end{figure}
+%
+%\begin{figure}
+%	\centering
+%	\begin{tikzpicture}
+%	\begin{axis}[
+%	width  = 0.85*\textwidth,
+%	height = 8cm,
+%	major x tick style = transparent,
+%	bar width=10pt,
+%	ymajorgrids = true,
+%	ylabel = {Throughput in $Gops/sec$},
+%	xlabel = {Filter Benchmarks},
+%	symbolic x coords={Chebyshev,Mibench,Qspline},
+%	xtick = data,
+%	nodes near coords,
+%	ybar,
+%	every node near coord/.append style={rotate=90, anchor=west,font=\scriptsize, xshift=0.25cm},
+%	scaled y ticks = false,
+%	enlarge y limits={upper,value=0.2},
+%	enlarge x limits=0.25,
+%	ybar=2*\pgflinewidth,
+%	legend cell align=left,
+%	legend style={
+%	at={(.5,-0.2)},
+%	anchor=north,
+%	legend columns=-1
+%	column sep=0.5ex
+%}
+%	]
+%	\addplot[draw=black,fill=blue,every node near coord/.append style={xshift=.3cm}]
+%	coordinates {(Chebyshev, 0.708) (Mibench,0.77) (Qspline,0.88)};
+%	
+%	\addplot[draw=black,fill=orange]
+%	coordinates {(Chebyshev, 2.186) (Mibench,6.738) (Qspline,13.38)};
+%	
+%	\addplot[draw=black,fill=yellow,every node near coord/.append style={xshift=-0.5cm}]
+%	coordinates {(Chebyshev, 0.1955) (Mibench,0.352) (Qspline,0.493)};
+%	
+%	\addplot[draw=black,fill=red,every node near coord/.append style={xshift=-0.85cm}]
+%	coordinates {(Chebyshev, 0.5159) (Mibench,0.7831) (Qspline,1.169)};
+%	
+%	\legend{MXP,Intel i3,ARM v7,NEON}
+%	\end{axis}
+%	\end{tikzpicture}
+%	\caption{Halfword(16-bits) level throughput(Gops/sec) for filter benchmarks }
+%	\label{filter:2}
+%\end{figure}

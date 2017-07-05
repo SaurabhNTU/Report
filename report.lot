@@ -4,17 +4,17 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces Speedup for the benchmarks on Linux\relax }}{29}{table.caption.19}
-\contentsline {table}{\numberline {5.2}{\ignorespaces Benchmarks Characteristics\relax }}{31}{table.caption.21}
-\contentsline {table}{\numberline {5.3}{\ignorespaces Kernel Benchmarks\relax }}{32}{table.caption.22}
-\contentsline {table}{\numberline {5.4}{\ignorespaces Poly-2 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.23}
-\contentsline {table}{\numberline {5.5}{\ignorespaces Poly-3 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.24}
-\contentsline {table}{\numberline {5.6}{\ignorespaces Throughput(Gops/sec) Analysis for Poly Benchmarks\relax }}{34}{table.caption.28}
-\contentsline {table}{\numberline {5.7}{\ignorespaces Throughput(Gops/sec) Analysis for Filter Benchmarks\relax }}{38}{table.caption.32}
-\contentsline {table}{\numberline {5.8}{\ignorespaces Throughput(Gops/sec) Analysis for Standard Compute Kernels\relax }}{42}{table.caption.36}
-\contentsline {table}{\numberline {5.9}{\ignorespaces Throughput(Gops/sec) Analysis for Linear Algebra kernel\relax }}{43}{table.caption.40}
+\contentsline {table}{\numberline {5.1}{\ignorespaces Speedup for the benchmarks on Linux\relax }}{29}{table.caption.18}
+\contentsline {table}{\numberline {5.2}{\ignorespaces Benchmarks Characteristics\relax }}{31}{table.caption.20}
+\contentsline {table}{\numberline {5.3}{\ignorespaces Kernel Benchmarks\relax }}{32}{table.caption.21}
+\contentsline {table}{\numberline {5.4}{\ignorespaces Poly-2 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.22}
+\contentsline {table}{\numberline {5.5}{\ignorespaces Poly-3 Benchmark Runtime in $ms$ for 8-bit data\relax }}{33}{table.caption.23}
+\contentsline {table}{\numberline {5.6}{\ignorespaces Throughput(Gops/sec) Analysis for Poly Benchmarks\relax }}{34}{table.caption.27}
+\contentsline {table}{\numberline {5.7}{\ignorespaces Throughput(Gops/sec) Analysis for Filter Benchmarks\relax }}{40}{table.caption.31}
+\contentsline {table}{\numberline {5.8}{\ignorespaces Throughput(Gops/sec) Analysis for Standard Compute Kernels\relax }}{41}{table.caption.32}
+\contentsline {table}{\numberline {5.9}{\ignorespaces Throughput(Gops/sec) Analysis for Linear Algebra kernel\relax }}{41}{table.caption.33}
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {6.1}{\ignorespaces Image Processing Runtime Analysis\relax }}{48}{table.caption.46}
-\contentsline {table}{\numberline {6.2}{\ignorespaces SpMV Usage\relax }}{52}{table.caption.50}
-\contentsline {table}{\numberline {6.3}{\ignorespaces Runtime for SpMV kernel Computation\relax }}{53}{table.caption.51}
+\contentsline {table}{\numberline {6.1}{\ignorespaces Image Processing Runtime Analysis\relax }}{46}{table.caption.39}
+\contentsline {table}{\numberline {6.2}{\ignorespaces SpMV Usage\relax }}{50}{table.caption.43}
+\contentsline {table}{\numberline {6.3}{\ignorespaces Runtime for SpMV kernel Computation\relax }}{51}{table.caption.44}
 \addvspace {10\p@ }

@@ -1,5 +1,5 @@
 \newpage
-\chapter{Accelerating Image Processing and SpMV Analysis}
+\chapter{Accelerating Image Processing and SpMV}
 
 \section{Basic Image Processing Application}
 
@@ -14,12 +14,17 @@ We need to compile vbxapi library present in MXP repository to use MXP API’s, 
 
 The MXP application code for processing the input image for a negation operation is provided in Figure~\ref{cod:7}
 
+
+%\lstinputlisting[firstline=89, lastline=132, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
+
+
 \begin{figure}
 	\centering
 	\includegraphics[width=1\textwidth]{images/code2.png}
 	\caption{MXP application for Image negation}
 	\label{cod:7}
 \end{figure}
+
 
 %\lstinputlisting[language=c,firstline=89, lastline=122, frame=none,numbers=left,basicstyle=\fontsize{11}{13}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{hi.txt}
 
@@ -33,7 +38,7 @@ We took images of different dimensions and tried building image negative applica
 
 \section{Accelerating the SpMV Computational Kernel}
 
-Sparse matrix dense vector also known as SpMV is one of the widely used computational kernel. It finds its application to solve the sparse linear system in information retrieval and many other applications. Since it is widely used, it is important to have a benchmark for SpMV. However, SpMV is really very difficult to benchmark because the data structure which is used in sparse matrix, it's density of the non-zero entries and it's dimensions - all have a significant impact on SpMV performance \cite{25},\cite{26}. We present a method on how the pre-existing benchmark for SpMV can be used and how MXP soft-processor can be used to accelerate the SpMV.
+Sparse matrix dense vector also known as SpMV is one of the widely used computational kernel. It finds its application to solve the sparse linear system in information retrieval and many other applications. Since it is widely used, it is important to have a benchmark for SpMV. However, SpMV is really very difficult to benchmark because the data structure which is used in sparse matrix, it's density of the non-zero entries and it's dimensions - all have a significant impact on SpMV performance \cite{24},\cite{25}. We present a method on how the pre-existing benchmark for SpMV can be used and how MXP soft-processor can be used to accelerate the SpMV.
 
 \subsection{SpMV basics}
 	
@@ -72,7 +77,7 @@ In CSC format, all the nonzero entries of the matrix are kept in form of column 
 
 \subsection{Details of Pre-existing SpMV Benchmark}
 
-The Pre-existing benchmarking framework mentioned in \cite{25}, stores the elements of the matrix in BCSR (Blocked Compressed Sparse Row) format. The idea behind the BCSR is to divide a given sparse matrix of size m x n into blocks of size r x c. By doing so we would obtain m / r blocks of rows and n / c blocks of columns which further can be stored in CSR format. Hence, at the end we will obtain m / r blocks where each of them represents r number of rows of the matrix and n / c blocks where each of them represents c number of columns of the matrix. This method helps in improving the accessing the elements of the sparse matrix and efficiently storing them in contiguous array either in row order or column order form. The operations are performed very efficiently providing high speedups. The blocks inside the dense matrix in Figure~\ref{aaaa:10000} are coloured and row major ordering is being used.  
+The Pre-existing benchmarking framework mentioned in \cite{24}, stores the elements of the matrix in BCSR (Blocked Compressed Sparse Row) format. The idea behind the BCSR is to divide a given sparse matrix of size m x n into blocks of size r x c. By doing so we would obtain m / r blocks of rows and n / c blocks of columns which further can be stored in CSR format. Hence, at the end we will obtain m / r blocks where each of them represents r number of rows of the matrix and n / c blocks where each of them represents c number of columns of the matrix. This method helps in improving the accessing the elements of the sparse matrix and efficiently storing them in contiguous array either in row order or column order form. The operations are performed very efficiently providing high speedups. The blocks inside the dense matrix in Figure~\ref{aaaa:10000} are coloured and row major ordering is being used.  
 
 
 \begin{figure}
@@ -110,7 +115,7 @@ MXP APIs are configured for the existing benchmarking framework so that we can u
 
 The algorithm along with the code for calculating the runtime for SpMV kernel Computation can be found in the below link:
 
-Github Link : \url{https://github.com/AdhikariSaurabh/mxpbenchmarks}
+Github Link : \url{https://github.com/AdhikariSaurabh/mxpbenchmarks/tree/master/SpMV}
 
 
 
