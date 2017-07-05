@@ -15,12 +15,12 @@ The graph showing the speedup of different benchmarks are shown in the Figure~\r
 
 
 \section{Accelerating Compute Kernels}
-We have taken into consideration a benchmark set shown in the table 5.2 consisting of various compute kernels. These compute kernels are considered from the paperwork \cite{20},\cite{21},\cite{22},\cite{23}.These are quite good benchmarks that can be used to analyze the performance of the MXP soft processor against other embedded processors such as ARM v7, NEON SIMD unit and INTEL i3. We took the throughput as one of the main performance measures and compared the results for various compute kernels.
+We have taken into consideration a benchmark set shown in the table~\ref{b1:g1} consisting of various compute kernels. These compute kernels are considered from the paperwork \cite{20},\cite{21},\cite{22},\cite{23}.These are quite good benchmarks that can be used to analyze the performance of the MXP soft processor against other embedded processors such as ARM v7, NEON SIMD unit and INTEL i3. We took the throughput as one of the main performance measures and compared the results for various compute kernels.
 
 \input{tables/BenchmarksCharacteristics}
 
 
-The Table~\ref{b1:g1} demonstrates the characteristics of the benchmarks. Total number of the operations which are used to obtain the corresponding DAG (Directed Acyclic Graph) expression for compute kernels and corresponding Add, Sub, Mul and OR operations required are shown in table 5.2. 
+The Table~\ref{b1:g1} demonstrates the characteristics of the benchmarks. Total number of the operations which are used to obtain the corresponding DAG (Directed Acyclic Graph) expression for compute kernels and corresponding Add, Sub, Mul and OR operations required are shown in table~\ref{b1:g1}. 
 
 
 Table~\ref{dag:dag} demonstrates the kernel benchmarks along with the DAG expression corresponding to it. We mapped the kernel benchmarks on the MXP soft processor and obtained the corresponding throughput as it's one of the performance criterion that differentiates MXP from the other embedded hard processors.
@@ -34,10 +34,10 @@ Table~\ref{dag:dag} demonstrates the kernel benchmarks along with the DAG expres
 
 \section{Experimentation and Results}
 
-In our work, Xilinx ZedBoard is being used for experimentation and result analysis. We used the gcc for generating the ARM binaries and running the code for the NEON SIMD at the highest optimization level. We used -mfloat-abi=hard -mfpu=neon for running the code on the MXP soft-vector processor.
+In our work, Xilinx ZedBoard is being used for experimentation and result analysis. We used the native gcc along with --cpu=Cortex-A9 as the compiler option for generating the ARM binaries. Auto vectorization method was used to run the code on the NEON SIMD at the highest optimization level with the compiler option to be -mfpu=neon -ftree-vectorize. We used -mfloat-abi=hard -mfpu=neon for running the code on the MXP soft-vector processor and the compute kernel performance were also analyzed running them on the Intel i3 dual core processor.
 
 \subsection{Runtime Comparison}
-We compared the runtime for the poly benchmarks (degree-2 and degree-3 polynomial) for huge number of input samples. We observed that MXP outperforms NEON SIMD unit and ARM v7 as it parallelizes the computation and communication. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. The Table~\ref{x:20} and Table~\ref{y:21} represents the runtime in milliseconds for different number of input samples for the poly-2 (quadratic) and poly-3 (cubic) benchmarks respectively. We also plotted a graph between Time in Milliseconds Vs Datasize which shows that the time taken by the MXP soft-vector processor for processing the input samples is very less and provides high speedups. Figure~\ref{dag:q} and Figure~\ref{dag:c} shows the observed runtime for the poly (degree-2 and degree-3) benchmarks. This clearly infers that the MXP soft-vector processor takes less runtime as compared to ARM v7 and Neon while we keep on increasing the number of the input samples. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3].
+We compared the runtime for the poly benchmarks (degree-2 and degree-3 polynomial) for huge number of input samples. We observed that MXP outperforms NEON SIMD unit and ARM v7 as it parallelizes the computation and communication. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. The Table~\ref{x:20} and Table~\ref{y:21} represents the runtime in milliseconds for different number of input samples for the poly-2 (quadratic) and poly-3 (cubic) benchmarks respectively. We also plotted a graph between Time in milliseconds Vs Datasize which shows that the time taken by the MXP soft-vector processor for processing the input samples is very less and provides high speedups. Figure~\ref{dag:q} and Figure~\ref{dag:c} shows the observed runtime for the poly (degree-2 and degree-3) benchmarks. This clearly infers that the MXP soft-vector processor takes less runtime as compared to ARM v7 and Neon while we keep on increasing the number of the input samples. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3].
 
 \input{tables/Poly-2BenchmarkRuntime}
 \input{tables/Poly-3BenchmarkRuntime}
@@ -56,7 +56,7 @@ In this section, we are going to compare the MXP soft-vector processor with othe
 \subsubsection{Throughput Analysis for poly benchmark}
 
 The compute kernels for the first part of performance comparison work which we took were polynomial with degree-2 (quadratic) and degree-3 (cubic).
-We observed that for these benchmarks, MXP has very high throughput when it is operating at the byte(8-bits) level. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. Architecture specification and the corresponding performance in terms of throughput for the poly (degree-2 and degree-3) benchmarks are mentioned in table~\ref{poly:c}.  Figure~\ref{throughput_quad_cubic} demonstrates the average throughput (Gops/sec) obtained while operating on the byte, halfword and word level.
+We observed that for these benchmarks, MXP can provide a maximum throughput of 1.51 Gops for quad and 2.287 Gops for the cubic kernel when it is operating at the byte(8-bits) level. These results shows that the MXP soft-processor is better than ARMv7 ($4.75\times$) and NEON ($1.56\times$) while operating on quadratic kernel and is better than ARMv7 ($5.71\times$) and NEON ($1.34\times$) while operating on cubic kernel. MXP provides better speedups due to the superior double-buffered memory transfer optimization [3.1.3]. Architecture specification and the corresponding performance in terms of throughput for the poly (degree-2 and degree-3) benchmarks are mentioned in table~\ref{poly:c}.  Figure~\ref{throughput_quad_cubic} demonstrates the average throughput (Gops/sec) obtained while operating on the byte, halfword and word level. It can be inferred from the values that the MXP soft processor provides highest speedups when it operates at the byte level. It provides a speedup of ($4\times$) when it operates at byte level and ($2\times$) when it operates at halfword level when compared to the word level speedup.
 
 \input{tables/ThroughputAnalysisforPolyBenchmarks}
 %\input{figures_tex/Bytelevelpolynomialbenchmarks}
@@ -68,7 +68,9 @@ We observed that for these benchmarks, MXP has very high throughput when it is o
 \subsubsection{Throughput Analysis for filter compute kernel}
 
 The compute kernels for second part of performance comparison which we took were the standard filter kernel. Throughput analysis for filter compute Kernels such as Chebyshev, Mibench, Sgfilter and Qspline were done.
-We observed that for these benchmarks, MXP has very high throughput when it is operating at the byte(8-bits) level. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. Table~\ref{poly:d} explains the architecture specification and the corresponding throughput obtained in terms of Gops/sec for various benchmarks. Figure~\ref{throughput_kernel_byte}, ~\ref{throughput_kernel_half} and ~\ref{throughput_kernel_word} demonstrates the average throughput (Gops/sec) obtained while operating on the word (32-bits), halfword (16- bits) and byte (8-bits) levels.
+We observed that for these benchmarks, MXP have better throughput when it is operating at the byte(8-bits) level. MXP can provide a maximum throughput of 1.41 Gops for chebyshev kernel, 1.54 Gops for the mibench kernel and 1.76 Gops for the qspline kernel when it is operating at the byte(8-bits) level. These results shows that the MXP soft-processor is better than ARMv7 ($6.38\times$) and NEON ($2.56\times$) while operating on chebyshev kernel and while operating on mibench kernel is better than ARMv7 ($4.21\times$) and NEON ($3.34\times$) . MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. 
+
+Table~\ref{poly:d} explains the architecture specification and the corresponding throughput obtained in terms of Gops/sec for various benchmarks. Figure~\ref{throughput_kernel_byte}, ~\ref{throughput_kernel_half} and ~\ref{throughput_kernel_word} demonstrates the average throughput (Gops/sec) obtained while operating on the word (32-bits), halfword (16- bits) and byte (8-bits) levels.
  We also observed that for a specific benchmark, the performance at the byte level was 4 times and at the halfword level was 2 times when compared with the performance at the word level for the MXP soft-vector processor. For MXP, we have the width of the data as selectable parameter.
 
 \input{tables/ThroughputAnalysisforFilterBenchmarks}
@@ -81,7 +83,7 @@ We observed that for these benchmarks, MXP has very high throughput when it is o
 
 \subsubsection{Throughput Analysis for Standard kernels}
 
-As a third part of performance comparison work, we took various benchmarks such as FFT, KMEANS, MM, SPMV, STENCIL and MRI which are the standard compute kernels. We observed that for these compute kernels, MXP has high throughput. MXP has very high speedups due to the superior double-buffered memory transfer optimization [3.1.3]. Table~\ref{poly:a} explains the architecture specification and the corresponding throughput obtained in terms of Gops/sec for various benchmarks. Figure~\ref{throughput_kernel_byte}, ~\ref{throughput_kernel_half}and ~\ref{throughput_kernel_word} demonstrates the average throughput (Gops/sec) obtained while operating on the word (32-bits), halfword (16- bits) and byte (8-bits) levels.
+As a third part of performance comparison work, we took various benchmarks such as FFT, KMEANS, MM, SPMV, STENCIL and MRI which are the standard compute kernels. We observed that for these compute kernels, MXP has high throughput. The maximum throughput that can be obtained for the MXP soft-processor at byte level for fft kernel is 0.69 Gops, kmeans is 0.91 Gops, mm is 0.62 Gops, spmv is 0.55 Gops, stencil is 0.59 and for mri it is 0.38 Gops. MXP has better speedups due to the superior double-buffered memory transfer optimization [3.1.3]. Table~\ref{poly:a} explains the architecture specification and the corresponding throughput obtained in terms of Gops/sec for various benchmarks. Figure~\ref{throughput_kernel_byte}, ~\ref{throughput_kernel_half}and ~\ref{throughput_kernel_word} demonstrates the average throughput (Gops/sec) obtained while operating on the word (32-bits), halfword (16- bits) and byte (8-bits) levels.
 
 \input{tables/ThroughputAnalysisforStandardComputeKernels}
 %\input{figures_tex/ByteCompute}
@@ -97,17 +99,23 @@ We accelerate two linear algebra kernels namely atax and bicg using MXP overlay.
     
     
     \subsubsection{Speedup Analysis w.r.t ARM cortex A9}
-    Speedup analysis for MXP, SIMD NEON and INTEL i3 was obtained taking ARM Cortex A9 as the reference processor. The DFG processing for the various kernels on MXP is summarized in this section. The speedup factors were calculated for standard kernels at the byte, halfword and the word level. The analysis shows that when we are operating at the byte level the MXP provides the four times parallelism and hence is supposed to give high speedup as compared to other processors. Figure~\ref{speedup:1} demonstrates the byte level speedup obtained with respect to the ARM cortex A9 processor. It can be inferred that the MXP provides high speedup for the kernel with much more computation as MXP make use of the overlapping of communication and computation feature to hide the time incurred in transferring the data. Figure~\ref{speedup:2} and Figure~\ref{speedup:3} demonstrates the halfword and the word level speedup obtained with respect to the ARM cortex A9 processor. With respect to these graphs it can be observed that the INTEL i3 processor have some better speedup for kernels requiring high computation.
+    Speedup analysis for MXP, SIMD NEON and INTEL i3 was obtained taking ARM Cortex A9 as the reference processor. The DFG processing for the various kernels on MXP is summarized in this section. The speedup factors were calculated for standard kernels at the byte, halfword and the word level. The analysis shows that Intel i3 processor running at 2 Ghz and having the theoretical peak performance of 16 Gops outperforms everyone and provides very high speedup. When we are operating at the byte level the MXP provides the four times parallelism and hence is supposed to give high speedup as compared Arm v7 and NEON SIMD unit. MXP soft processor performs better than ARM v7 and the SIMD NEON unit for all the compute kernels. Figure~\ref{speedup:1} demonstrates the byte level speedup obtained with respect to the ARM cortex A9 processor. It can be inferred that the MXP provides high speedup for the kernel with much more computation as MXP make use of the overlapping of communication and computation feature to hide the time incurred in transferring the data. Figure~\ref{speedup:2} and Figure~\ref{speedup:3} demonstrates the halfword and the word level speedup obtained with respect to the ARM cortex A9 processor.
+  
+   \input{figures_tex/bytelevelspeedup.tex}
+  \input{figures_tex/halfwordlevelspeedup.tex}
+  \input{figures_tex/wordlevelspeedup.tex}
+  
   
   \section{Compute Kernel Code}
   
   Runtime and Throughput calculation application for all the compute kernels can be found from the below given repository:
   
+  
+  
+  
   Github Link : \url{https://github.com/AdhikariSaurabh/mxpbenchmarks/polyresults}
   
-  \input{figures_tex/bytelevelspeedup.tex}
-  \input{figures_tex/halfwordlevelspeedup.tex}
-  \input{figures_tex/wordlevelspeedup.tex}
+ 
    
 %    \begin{figure}
 %    	\centering

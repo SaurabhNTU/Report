@@ -18,7 +18,7 @@ Vivado Design Suite 2016 along with the SDK option is installed so that cross-co
 
 \begin{figure}
 	\centering
-	\includegraphics[width=.9\textwidth]{images/bootloader.png}
+	\includegraphics[width=1\textwidth]{images/bootloader.png}
  
 	\caption{Flowchart for Linux setup}
 	\label{zed:boot}
@@ -74,7 +74,7 @@ We renamed u-boot to u-boot.elf and while building Linux kernel we need mkimage 
 	
 	\item Insert the SD card with Xillybus setup into the computer where this kernel is compiled and give:
 	
-		\lstinputlisting[firstline=34, lastline=35, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
+		\lstinputlisting[firstline=34, lastline=35, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 		
 	This will copy all the kernel modules built in step 4 into the path: IN-
 	STALL MOD PATH/lib/modules/\{kernel image name\}/
@@ -86,15 +86,15 @@ We renamed u-boot to u-boot.elf and while building Linux kernel we need mkimage 
 \begin{enumerate}
 	\item Inside Linux repo, compile device tree source (dts) to generate device tree blob (dtb).
 
-	\lstinputlisting[firstline=37, lastline=40, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}	
+	\lstinputlisting[firstline=37, lastline=40, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}	
 	
 	To avoid using ramdisk, we replace the contents of bootargs under the chosen node in mxp\_linux.dts as shown:
 	
-		\lstinputlisting[firstline=42, lastline=46, frame=none,numbers=left,basicstyle=\fontsize{10}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
+		\lstinputlisting[firstline=42, lastline=47, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 		
 	\item Copy folders from drivers/ directory inside MXP repo to the Device tree repo. Navigate to folder prebuilt zedboard\_arm\_viv\_v16 in MXP repo, and enter following commands:
 	
-			\lstinputlisting[firstline=48, lastline=55, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
+			\lstinputlisting[firstline=48, lastline=55, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}
 			
 %			\begin{figure}
 %				\centering
@@ -120,7 +120,7 @@ We renamed u-boot to u-boot.elf and while building Linux kernel we need mkimage 
 		
 		\item Finally the device tree is compiled.
 	
-\lstinputlisting[firstline=62, lastline=62, frame=none,numbers=left,basicstyle=\fontsize{11}{11}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}			
+\lstinputlisting[firstline=62, lastline=62, frame=none,numbers=left,basicstyle=\fontsize{10}{10}\selectfont\ttfamily, backgroundcolor=\color{gainsboro}]{CodeSnippet.txt}			
 		
 			
 \end{enumerate}

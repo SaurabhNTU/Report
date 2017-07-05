@@ -42,7 +42,8 @@ ext4partition)/in/sdcard/
 //change this content
 bootargs = "console=ttyPS0,115200 root=/dev/ram rw earlyprintk";
 //to this content
-bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 rw earlyprintk 
+bootargs = "console=ttyPS0,115200 root=/dev/mmcblk0p2 
+rw earlyprintk 
 rootfstype=ext4 rootwait devtmpfs.mount=0";
 
 // hsi command opens up the TCL shell 

@@ -14,11 +14,13 @@ Standard kernels such as FFT, KMEANS, MM, SPMV, STENCIL and MRI were also accele
 
 
 
-Polybench kernels, ATAX and BiCG were accelerated using MXP. For ATAX, we could get speedup of ${\approx}6$ for small dataset size and ${\approx}5$ for standard dataset size. For BiCG, we could get speedup of ${\approx}7$ for small dataset size and ${\approx}3$ for standard dataset size.
+Polybench kernels, ATAX and BiCG were accelerated using MXP. For ATAX, we could get speedup of ${\approx}5.62$ for small dataset size and ${\approx}4.63$ for standard dataset size. For BiCG, we could get speedup of ${\approx}3$ for small dataset size and ${\approx}3.25$ for standard dataset size.
 
 
 
-We also accelerated an image processing application using the MXP overlay and measured the runtime. The time took by the MXP was 0.03686 milliseconds for image having dimension as 128 X 128 pixels and 0.1843 milliseconds for image having dimension as 256 X 256 pixels. The speedup provided by the MXP overlay was very high when compared with the speedup provided by ARM v7, NEON SIMD unit and INTEL i3 processors. SpMV existing benchmarking framework was configured such that MXP APIs can be used to accelerate SpMV computational kernel.
+We also accelerated an image processing application using the MXP overlay and measured the runtime. The time took by the MXP was 0.03686 milliseconds for image having dimension as 128 X 128 pixels and 0.1843 milliseconds for image having dimension as 256 X 256 pixels. The speedup provided by the MXP overlay was very high when compared with the speedup provided by ARM v7, NEON SIMD unit and INTEL i3 processors.
+
+Result analysis shows that while operating on SpMV product computational kernel the MXP soft processor can be faster than ARMv7 ($2.07\times$).
 
 
 
