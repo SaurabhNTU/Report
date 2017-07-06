@@ -34,24 +34,23 @@
 \contentsline {subsubsection}{\numberline {5.3.2.1}Throughput Analysis for poly benchmark}{33}{subsubsection.5.3.2.1}
 \contentsline {subsubsection}{\numberline {5.3.2.2}Throughput Analysis for filter compute kernel}{35}{subsubsection.5.3.2.2}
 \contentsline {subsubsection}{\numberline {5.3.2.3}Throughput Analysis for Standard kernels}{38}{subsubsection.5.3.2.3}
-\contentsline {subsubsection}{\numberline {5.3.2.4}Throughput Analysis for Linear Algebra Kernel}{40}{subsubsection.5.3.2.4}
-\contentsline {subsubsection}{\numberline {5.3.2.5}Speedup Analysis w.r.t ARM cortex A9}{40}{subsubsection.5.3.2.5}
-\contentsline {section}{\numberline {5.4}Compute Kernel Code}{41}{section.5.4}
-\contentsline {chapter}{\numberline {6}Accelerating Image Processing and SpMV}{43}{chapter.6}
-\contentsline {section}{\numberline {6.1}Basic Image Processing Application}{43}{section.6.1}
-\contentsline {section}{\numberline {6.2}Experiments and Results}{43}{section.6.2}
-\contentsline {section}{\numberline {6.3}Accelerating the SpMV Computational Kernel}{44}{section.6.3}
-\contentsline {subsection}{\numberline {6.3.1}SpMV basics}{45}{subsection.6.3.1}
-\contentsline {subsubsection}{\numberline {6.3.1.1}Compressed Sparse Row Format}{46}{subsubsection.6.3.1.1}
-\contentsline {subsubsection}{\numberline {6.3.1.2}Compressed Sparse Column Format}{46}{subsubsection.6.3.1.2}
-\contentsline {subsection}{\numberline {6.3.2}Details of Pre-existing SpMV Benchmark}{47}{subsection.6.3.2}
-\contentsline {subsection}{\numberline {6.3.3}SpMV Usage Parameters}{47}{subsection.6.3.3}
-\contentsline {subsection}{\numberline {6.3.4}Accelerating SpMV Framework Using MXP APIs}{49}{subsection.6.3.4}
-\contentsline {section}{\numberline {6.4}SpMV Kernel Code}{49}{section.6.4}
-\contentsline {chapter}{\numberline {7}Conclusion and Future Work}{50}{chapter.7}
-\contentsline {section}{\numberline {7.1}Conclusions}{50}{section.7.1}
-\contentsline {section}{\numberline {7.2}Future Work}{52}{section.7.2}
-\contentsline {subsection}{\numberline {7.2.1}Power Analysis}{52}{subsection.7.2.1}
-\contentsline {subsection}{\numberline {7.2.2}Audio Processing Application}{52}{subsection.7.2.2}
-\contentsline {subsection}{\numberline {7.2.3}Completion of the SpMV Benchmarking Framework}{52}{subsection.7.2.3}
-\contentsline {chapter}{Bibliography}{53}{chapter*.45}
+\contentsline {subsubsection}{\numberline {5.3.2.4}Throughput Analysis for Linear Algebra Kernel}{39}{subsubsection.5.3.2.4}
+\contentsline {section}{\numberline {5.4}Compute Kernel Code}{40}{section.5.4}
+\contentsline {chapter}{\numberline {6}Accelerating Image Processing and SpMV}{41}{chapter.6}
+\contentsline {section}{\numberline {6.1}Basic Image Processing Application}{41}{section.6.1}
+\contentsline {section}{\numberline {6.2}Experiments and Results}{41}{section.6.2}
+\contentsline {section}{\numberline {6.3}Accelerating the SpMV Computational Kernel}{42}{section.6.3}
+\contentsline {subsection}{\numberline {6.3.1}SpMV basics}{43}{subsection.6.3.1}
+\contentsline {subsubsection}{\numberline {6.3.1.1}Compressed Sparse Row Format}{44}{subsubsection.6.3.1.1}
+\contentsline {subsubsection}{\numberline {6.3.1.2}Compressed Sparse Column Format}{44}{subsubsection.6.3.1.2}
+\contentsline {subsection}{\numberline {6.3.2}Details of Pre-existing SpMV Benchmark}{45}{subsection.6.3.2}
+\contentsline {subsection}{\numberline {6.3.3}SpMV Usage Parameters}{45}{subsection.6.3.3}
+\contentsline {subsection}{\numberline {6.3.4}Accelerating SpMV Framework Using MXP APIs}{47}{subsection.6.3.4}
+\contentsline {section}{\numberline {6.4}SpMV Kernel Code}{47}{section.6.4}
+\contentsline {chapter}{\numberline {7}Conclusion and Future Work}{48}{chapter.7}
+\contentsline {section}{\numberline {7.1}Conclusions}{48}{section.7.1}
+\contentsline {section}{\numberline {7.2}Future Work}{50}{section.7.2}
+\contentsline {subsection}{\numberline {7.2.1}Power Analysis}{50}{subsection.7.2.1}
+\contentsline {subsection}{\numberline {7.2.2}Audio Processing Application}{50}{subsection.7.2.2}
+\contentsline {subsection}{\numberline {7.2.3}Completion of the SpMV Benchmarking Framework}{50}{subsection.7.2.3}
+\contentsline {chapter}{Bibliography}{51}{chapter*.42}

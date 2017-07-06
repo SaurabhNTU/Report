@@ -98,12 +98,12 @@ We accelerate two linear algebra kernels namely atax and bicg using MXP overlay.
 
     
     
-    \subsubsection{Speedup Analysis w.r.t ARM cortex A9}
-    Speedup analysis for MXP, SIMD NEON and INTEL i3 was obtained taking ARM Cortex A9 as the reference processor. The DFG processing for the various kernels on MXP is summarized in this section. The speedup factors were calculated for standard kernels at the byte, halfword and the word level. The analysis shows that Intel i3 processor running at 2 Ghz and having the theoretical peak performance of 16 Gops outperforms everyone and provides very high speedup. When we are operating at the byte level the MXP provides the four times parallelism and hence is supposed to give high speedup as compared Arm v7 and NEON SIMD unit. MXP soft processor performs better than ARM v7 and the SIMD NEON unit for all the compute kernels. Figure~\ref{speedup:1} demonstrates the byte level speedup obtained with respect to the ARM cortex A9 processor. It can be inferred that the MXP provides high speedup for the kernel with much more computation as MXP make use of the overlapping of communication and computation feature to hide the time incurred in transferring the data. Figure~\ref{speedup:2} and Figure~\ref{speedup:3} demonstrates the halfword and the word level speedup obtained with respect to the ARM cortex A9 processor.
-  
-   \input{figures_tex/bytelevelspeedup.tex}
-  \input{figures_tex/halfwordlevelspeedup.tex}
-  \input{figures_tex/wordlevelspeedup.tex}
+%    \subsubsection{Speedup Analysis w.r.t ARM cortex A9}
+%    Speedup analysis for MXP, SIMD NEON and INTEL i3 was obtained taking ARM Cortex A9 as the reference processor. The DFG processing for the various kernels on MXP is summarized in this section. The speedup factors were calculated for standard kernels at the byte, halfword and the word level. The analysis shows that Intel i3 processor running at 2 Ghz and having the theoretical peak performance of 16 Gops outperforms everyone and provides very high speedup. When we are operating at the byte level the MXP provides the four times parallelism and hence is supposed to give high speedup as compared Arm v7 and NEON SIMD unit. MXP soft processor performs better than ARM v7 and the SIMD NEON unit for all the compute kernels. Figure~\ref{speedup:1} demonstrates the byte level speedup obtained with respect to the ARM cortex A9 processor. It can be inferred that the MXP provides high speedup for the kernel with much more computation as MXP make use of the overlapping of communication and computation feature to hide the time incurred in transferring the data. Figure~\ref{speedup:2} and Figure~\ref{speedup:3} demonstrates the halfword and the word level speedup obtained with respect to the ARM cortex A9 processor.
+%  
+%   \input{figures_tex/bytelevelspeedup.tex}
+%  \input{figures_tex/halfwordlevelspeedup.tex}
+%  \input{figures_tex/wordlevelspeedup.tex}
   
   
   \section{Compute Kernel Code}
